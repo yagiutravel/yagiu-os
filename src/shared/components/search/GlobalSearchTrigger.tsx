@@ -2,14 +2,11 @@
 
 import { Search } from "lucide-react";
 import { useGlobalSearch } from "@/components/search/GlobalSearchProvider";
-
-function getShortcutLabel(): string {
-  if (typeof navigator === "undefined") return "⌘K";
-  return navigator.platform.toUpperCase().includes("MAC") ? "⌘K" : "Ctrl+K";
-}
+import { useKeyboardShortcutLabel } from "@/shared/hooks/useKeyboardShortcutLabel";
 
 export function GlobalSearchTrigger() {
   const { openSearch } = useGlobalSearch();
+  const shortcutLabel = useKeyboardShortcutLabel();
 
   return (
     <button
@@ -21,7 +18,7 @@ export function GlobalSearchTrigger() {
       <Search className="h-4 w-4 shrink-0" strokeWidth={1.75} />
       <span className="truncate">Cerca...</span>
       <kbd className="ml-auto hidden rounded bg-white px-1.5 py-0.5 text-[10px] font-medium text-zinc-400 ring-1 ring-zinc-200 sm:inline">
-        {getShortcutLabel()}
+        {shortcutLabel}
       </kbd>
     </button>
   );

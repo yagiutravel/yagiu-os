@@ -1,12 +1,22 @@
+import { mapCamereToViews } from "@/mappers/camera.mapper";
 import {
   buildSearchIndex,
   mapDashboardData,
   searchDashboardIndex,
 } from "@/mappers/dashboard.mapper";
-import { getTours } from "@/services/tour.service";
-import { getCamereByTourId } from "@/services/camera.service";
+import { mapPartecipazioniToViews } from "@/mappers/tour-partecipazione.mapper";
+import {
+  listAssegnazioniByTourIdMock,
+  listCamereByTourIdMock,
+  seedCamereMock,
+} from "@/mock/camere";
+import {
+  listPartecipazioniByTourIdMock,
+  listPartecipazioniMock,
+  seedPartecipazioniMock,
+} from "@/mock/tour-partecipazioni";
 import { getClienti } from "@/services/clienti.service";
-import { getPartecipazioniByTourId } from "@/services/tour-partecipazione.service";
+import { getTours } from "@/services/tour.service";
 import type { CameraView } from "@/types/camera";
 import type {
   DashboardData,
@@ -18,10 +28,10 @@ import type { PartecipazioneTourView } from "@/types/tour-partecipazione";
 let cachedSearchIndex: DashboardSearchIndex | null = null;
 
 async function loadAggregationData() {
-  const [clienti, tours] = await Promise.all([
-    getClienti(),
-    Promise.resolve(getTours()),
-  ]);
+  const [clienti, tours] = await Promise.all([getClienti(), getTours()]);
+
+  seedPartecipazioniMock(clienti);
+  seedCamereMock(listPartecipazioniMock());
 
   const activeTours = tours.filter(
     (tour) =>
@@ -30,28 +40,35 @@ async function loadAggregationData() {
   const partecipazioniByTour = new Map<string, PartecipazioneTourView[]>();
   const camereByTour = new Map<string, CameraView[]>();
 
-  await Promise.all(
-    activeTours.map(async (tour) => {
-      const [partecipazioni, camere] = await Promise.all([
-        getPartecipazioniByTourId(tour.id),
-        getCamereByTourId(tour.id),
-      ]);
-      partecipazioniByTour.set(tour.id, partecipazioni);
-      camereByTour.set(tour.id, camere);
-    }),
-  );
+  for (const tour of activeTours) {
+    const partecipazioni = mapPartecipazioniToViews(
+      listPartecipazioniByTourIdMock(tour.id),
+      clienti,
+    );
+    partecipazioniByTour.set(tour.id, partecipazioni);
+
+    camereByTour.set(
+      tour.id,
+      mapCamereToViews(
+        listCamereByTourIdMock(tour.id),
+        listAssegnazioniByTourIdMock(tour.id),
+        partecipazioni,
+      ),
+    );
+  }
 
   return { clienti, tours, partecipazioniByTour, camereByTour };
 }
 
 export async function getDashboardData(): Promise<DashboardData> {
   const data = await loadAggregationData();
+  const now = new Date();
   cachedSearchIndex = buildSearchIndex(
     data.clienti,
     data.tours,
     data.partecipazioniByTour,
   );
-  return mapDashboardData(data);
+  return mapDashboardData({ ...data, now });
 }
 
 export async function searchDashboard(

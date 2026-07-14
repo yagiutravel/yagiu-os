@@ -2,6 +2,9 @@ import type { DashboardSalutoPeriodo } from "@/types/dashboard";
 
 export const DASHBOARD_USER_NAME = "Martino";
 
+export const DASHBOARD_LOCALE = "it-IT";
+export const DASHBOARD_TIME_ZONE = "Europe/Rome";
+
 export const IMPORTO_ACCONTO_MEDIO = 850;
 export const IMPORTO_SALDO_MEDIO = 2400;
 
@@ -33,11 +36,35 @@ export function formatGiorniMancanti(giorni: number): string {
 }
 
 export function formatImportoEuro(importo: number): string {
-  return new Intl.NumberFormat("it-IT", {
+  return new Intl.NumberFormat(DASHBOARD_LOCALE, {
     style: "currency",
     currency: "EUR",
     maximumFractionDigits: 0,
   }).format(importo);
+}
+
+export function formatDashboardDate(
+  isoDate: string,
+  options: Intl.DateTimeFormatOptions,
+): string {
+  const date = new Date(`${isoDate}T12:00:00`);
+  if (Number.isNaN(date.getTime())) return "—";
+
+  return date.toLocaleDateString(DASHBOARD_LOCALE, {
+    timeZone: DASHBOARD_TIME_ZONE,
+    ...options,
+  });
+}
+
+export function formatDashboardMonthYear(year: number, month: number): string {
+  return new Date(Date.UTC(year, month, 1, 12)).toLocaleDateString(
+    DASHBOARD_LOCALE,
+    {
+      timeZone: DASHBOARD_TIME_ZONE,
+      month: "long",
+      year: "numeric",
+    },
+  );
 }
 
 export function formatOraRelativa(isoDate: string, now = new Date()): string {
@@ -57,7 +84,8 @@ export function formatOraRelativa(isoDate: string, now = new Date()): string {
   if (diffDays === 1) return "Ieri";
   if (diffDays < 7) return `${diffDays} giorni fa`;
 
-  return date.toLocaleDateString("it-IT", {
+  return date.toLocaleDateString(DASHBOARD_LOCALE, {
+    timeZone: DASHBOARD_TIME_ZONE,
     day: "numeric",
     month: "short",
   });

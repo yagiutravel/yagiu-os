@@ -6,6 +6,7 @@ import type {
   DashboardCalendario,
   DashboardCalendarioEventoTipo,
 } from "@/types/dashboard";
+import { formatDashboardDate, formatDashboardMonthYear } from "@/models/dashboard";
 import { DashboardWidget } from "../DashboardWidget";
 
 type CalendarioWidgetProps = {
@@ -47,10 +48,7 @@ export function CalendarioWidget({ calendario }: CalendarioWidgetProps) {
     eventDays.set(day, existing);
   }
 
-  const monthLabel = new Date(anno, mese, 1).toLocaleDateString("it-IT", {
-    month: "long",
-    year: "numeric",
-  });
+  const monthLabel = formatDashboardMonthYear(anno, mese);
 
   const upcoming = eventi.slice(0, 4);
 
@@ -120,7 +118,7 @@ export function CalendarioWidget({ calendario }: CalendarioWidgetProps) {
                 className={`h-2 w-2 shrink-0 rounded-full ${EVENTO_STYLES[evento.tipo].dot}`}
               />
               <p className="truncate text-xs text-zinc-600">
-                {new Date(`${evento.data}T00:00:00`).toLocaleDateString("it-IT", {
+                {formatDashboardDate(evento.data, {
                   day: "numeric",
                   month: "short",
                 })}{" "}

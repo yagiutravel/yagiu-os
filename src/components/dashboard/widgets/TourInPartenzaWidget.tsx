@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { Compass } from "lucide-react";
-import { formatGiorniMancanti } from "@/models/dashboard";
+import { formatDashboardDate, formatGiorniMancanti } from "@/models/dashboard";
 import { TourStatoBadge } from "@/components/tour/TourStatoBadge";
 import type { DashboardTourInPartenza } from "@/types/dashboard";
 import { DashboardWidget } from "../DashboardWidget";
@@ -12,7 +12,7 @@ type TourInPartenzaWidgetProps = {
 };
 
 function formatDataPartenza(isoDate: string): string {
-  return new Date(`${isoDate}T00:00:00`).toLocaleDateString("it-IT", {
+  return formatDashboardDate(isoDate, {
     day: "numeric",
     month: "short",
     year: "numeric",

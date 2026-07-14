@@ -1,18 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
 import { Spinner } from "@/components/ui/Spinner";
 import { GLOBAL_SEARCH_CATEGORIA_CONFIG } from "@/lib/global-search/categoria.config";
 import { searchGlobal } from "@/services/global-search.service";
 import type { GlobalSearchResponse } from "@/types/global-search";
+import { useKeyboardShortcutLabel } from "@/shared/hooks/useKeyboardShortcutLabel";
 import { useGlobalSearch } from "./GlobalSearchProvider";
-
-function getShortcutLabel(): string {
-  if (typeof navigator === "undefined") return "⌘K";
-  return navigator.platform.toUpperCase().includes("MAC") ? "⌘K" : "Ctrl+K";
-}
 
 export function GlobalSearchModal() {
   const router = useRouter();
@@ -23,7 +19,7 @@ export function GlobalSearchModal() {
   const inputRef = useRef<HTMLInputElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
 
-  const shortcutLabel = useMemo(() => getShortcutLabel(), []);
+  const shortcutLabel = useKeyboardShortcutLabel();
 
   useEffect(() => {
     if (!open) {
