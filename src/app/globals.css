@@ -1,0 +1,51 @@
+@import "tailwindcss";
+
+:root {
+  --background: #fafafa;
+  --foreground: #18181b;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+dialog:not([open]) {
+  display: none !important;
+  pointer-events: none !important;
+}
+
+dialog::backdrop {
+  background: rgb(24 24 27 / 0.4);
+  backdrop-filter: blur(2px);
+}
+
+dialog {
+  border: none;
+  padding: 0;
+}
+
+dialog:focus {
+  outline: none;
+}
+
+input[type="search"]::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+}

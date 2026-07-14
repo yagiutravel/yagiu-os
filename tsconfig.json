@@ -1,0 +1,49 @@
+{
+  "compilerOptions": {
+    "target": "ES2017",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "react-jsx",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/components/ui/*": ["./src/shared/components/ui/*"],
+      "@/components/layout/*": ["./src/shared/components/layout/*"],
+      "@/components/providers/*": ["./src/shared/providers/*"],
+      "@/components/search/*": ["./src/shared/components/search/*"],
+      "@/components/notifiche/*": ["./src/shared/components/notifiche/*"],
+      "@/components/audit-log/*": ["./src/shared/components/audit-log/*"],
+      "@/lib/navigation": ["./src/config/navigation"],
+      "@/lib/supabase": ["./src/config/supabase"],
+      "@/lib/clienti/profilo-ui": ["./src/shared/utils/profilo-ui"],
+      "@/shared/*": ["./src/shared/*"],
+      "@/features/*": ["./src/features/*"],
+      "@/config/*": ["./src/config/*"],
+      "@/repositories/*": ["./src/repositories/*"],
+      "@/tenant/*": ["./src/tenant/*"],
+      "@/tenant": ["./src/tenant/index.ts"],
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts",
+    "**/*.mts"
+  ],
+  "exclude": ["node_modules"]
+}
