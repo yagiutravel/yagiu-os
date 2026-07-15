@@ -9,7 +9,9 @@
     "lint": "eslint",
     "supabase:verify": "node --env-file=.env.local scripts/verify-supabase.mjs",
     "supabase:apply-migrations": "node --env-file=.env.local scripts/apply-migrations.mjs",
-    "test:tour-flow": "node --env-file=.env.local scripts/tour-flow-smoke.mjs"
+    "test:tour-flow": "node --env-file=.env.local scripts/tour-flow-smoke.mjs",
+    "test:preventivi-flow": "node --env-file=.env.local scripts/preventivi-flow-smoke.mjs",
+    "test": "npm run test:tour-flow && npm run test:preventivi-flow"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.110.5",

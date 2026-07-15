@@ -13,6 +13,7 @@ import { DashboardGlobalSearch } from "./DashboardGlobalSearch";
 import { DashboardQuickActions } from "./DashboardQuickActions";
 import { TourInPartenzaWidget } from "./widgets/TourInPartenzaWidget";
 import { PagamentiWidget } from "./widgets/PagamentiWidget";
+import { PreventiviWidget } from "./widgets/PreventiviWidget";
 import { DocumentiWidget } from "./widgets/DocumentiWidget";
 import { CamereWidget } from "./widgets/CamereWidget";
 import { ViaggiatoriWidget } from "./widgets/ViaggiatoriWidget";
@@ -91,6 +92,7 @@ export function DashboardView() {
                   <TourInPartenzaWidget tours={data.tourInPartenza} />
                   <div className="grid gap-6 md:grid-cols-2">
                     <PagamentiWidget pagamenti={data.pagamenti} />
+                    <PreventiviWidget preventivi={data.preventivi} />
                     <DocumentiWidget documenti={data.documenti} />
                     <CamereWidget camere={data.camere} />
                     <ViaggiatoriWidget viaggiatori={data.viaggiatori} />

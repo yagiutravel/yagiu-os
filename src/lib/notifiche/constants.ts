@@ -11,6 +11,10 @@ export const NOTIFICA_TIPO_FILTRI: Array<{
   { value: "camera_incompleta", label: "Camera incompleta" },
   { value: "pagamento_ricevuto", label: "Pagamento ricevuto" },
   { value: "cliente_nuovo", label: "Cliente nuovo" },
+  { value: "preventivo_creato", label: "Preventivo creato" },
+  { value: "preventivo_inviato", label: "Preventivo inviato" },
+  { value: "preventivo_accettato", label: "Preventivo accettato" },
+  { value: "preventivo_convertito", label: "Preventivo convertito" },
 ];
 
 export const NOTIFICA_STATO_FILTRI: Array<{
@@ -29,4 +33,8 @@ export const NOTIFICA_TIPO_LABELS: Record<NotificaTipo, string> = {
   camera_incompleta: "Camera incompleta",
   pagamento_ricevuto: "Pagamento ricevuto",
   cliente_nuovo: "Cliente nuovo",
+  preventivo_creato: "Preventivo creato",
+  preventivo_inviato: "Preventivo inviato",
+  preventivo_accettato: "Preventivo accettato",
+  preventivo_convertito: "Preventivo convertito",
 };

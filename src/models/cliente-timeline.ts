@@ -16,6 +16,10 @@ export const CLIENTE_TIMELINE_EVENTO_LABELS: Record<
   whatsapp_inviato: "WhatsApp inviato",
   checklist_completata: "Checklist completata",
   tour_concluso: "Tour concluso",
+  preventivo_creato: "Preventivo creato",
+  preventivo_inviato: "Preventivo inviato",
+  preventivo_accettato: "Preventivo accettato",
+  preventivo_convertito: "Iscrizione da preventivo",
 };
 
 export function createClienteTimelineEventoId(): string {

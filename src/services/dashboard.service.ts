@@ -6,6 +6,7 @@ import {
 import { getCamereByTourId } from "@/services/camera.service";
 import { getClienti } from "@/services/clienti.service";
 import { countAssicurazioniDaEmettere } from "@/services/tour-insurance.service";
+import { listPreventivi } from "@/services/preventivo.service";
 import { getPartecipazioniByTourId } from "@/services/tour-partecipazione.service";
 import { getTours } from "@/services/tour.service";
 import type { CameraView } from "@/types/camera";
@@ -19,11 +20,20 @@ import type { PartecipazioneTourView } from "@/types/tour-partecipazione";
 let cachedSearchIndex: DashboardSearchIndex | null = null;
 
 async function loadAggregationData() {
-  const [clienti, tours, assicurazioniMancanti] = await Promise.all([
+  const [clienti, tours, assicurazioniMancanti, preventivi] = await Promise.all([
     getClienti(),
     getTours(),
     countAssicurazioniDaEmettere().catch(() => 0),
+    listPreventivi().catch(() => []),
   ]);
+
+  const preventiviInAttesa = preventivi.filter((item) =>
+    ["Bozza", "Inviato"].includes(item.stato),
+  ).length;
+  const preventiviAccettati = preventivi.filter((item) => item.stato === "Accettato").length;
+  const preventiviValoreInAttesa = preventivi
+    .filter((item) => ["Bozza", "Inviato", "Accettato"].includes(item.stato))
+    .reduce((sum, item) => sum + item.totale, 0);
 
   const activeTours = tours.filter(
     (tour) =>
@@ -43,7 +53,16 @@ async function loadAggregationData() {
     }),
   );
 
-  return { clienti, tours, partecipazioniByTour, camereByTour, assicurazioniMancanti };
+  return {
+    clienti,
+    tours,
+    partecipazioniByTour,
+    camereByTour,
+    assicurazioniMancanti,
+    preventiviInAttesa,
+    preventiviAccettati,
+    preventiviValoreInAttesa,
+  };
 }
 
 export async function getDashboardData(): Promise<DashboardData> {

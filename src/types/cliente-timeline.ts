@@ -7,7 +7,11 @@ export type ClienteTimelineEventoTipo =
   | "email_inviata"
   | "whatsapp_inviato"
   | "checklist_completata"
-  | "tour_concluso";
+  | "tour_concluso"
+  | "preventivo_creato"
+  | "preventivo_inviato"
+  | "preventivo_accettato"
+  | "preventivo_convertito";
 
 /** Record evento timeline — pronto per tabella Supabase `cliente_timeline_eventi`. */
 export type ClienteTimelineEvento = {

@@ -1,4 +1,5 @@
-import { mapAuditLogEntriesToViews } from "@/mappers/audit-log.mapper";
+import { fetchAuditLogRows } from "@/services/audit-log-record.service";
+import { mapAuditLogEntriesToViews, mapAuditLogRowToEntry } from "@/mappers/audit-log.mapper";
 import { listAuditLogMock } from "@/mock/audit-log";
 import type { AuditLogEntitaTipo, AuditLogView } from "@/types/audit-log";
 
@@ -10,6 +11,10 @@ export class AuditLogServiceError extends Error {
 }
 
 export async function getAuditLogEntries(): Promise<AuditLogView[]> {
+  const rows = await fetchAuditLogRows();
+  if (rows.length > 0) {
+    return mapAuditLogEntriesToViews(rows.map(mapAuditLogRowToEntry));
+  }
   return mapAuditLogEntriesToViews(listAuditLogMock());
 }
 

@@ -24,6 +24,7 @@ const ICONS: Record<DashboardAttivitaTipo, typeof Users> = {
   camera: BedDouble,
   cliente: UserPlus,
   partecipante: Users,
+  preventivo: FileText,
 };
 
 export function AttivitaRecentiWidget({ attivita }: AttivitaRecentiWidgetProps) {

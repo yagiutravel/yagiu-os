@@ -31,6 +31,11 @@ export const GLOBAL_SEARCH_CATEGORIA_CONFIG: Record<
     bg: "bg-amber-50",
     text: "text-amber-700",
   },
+  preventivi: {
+    icon: FileText,
+    bg: "bg-fuchsia-50",
+    text: "text-fuchsia-700",
+  },
   pagamenti: {
     icon: CreditCard,
     bg: "bg-emerald-50",

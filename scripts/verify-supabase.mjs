@@ -30,6 +30,8 @@ const SPRINT_1B_TABLES = [
   "tour_insurances",
 ];
 
+const SPRINT_2_TABLES = ["preventivi", "preventivo_righe"];
+
 async function verifySupabaseConnection() {
   if (!url || !anonKey) {
     console.error("❌ Variabili mancanti in .env.local:");
@@ -69,7 +71,7 @@ async function verifySupabaseConnection() {
   }
 
   let missing = 0;
-  for (const table of [...SPRINT_1A_TABLES, ...SPRINT_1B_TABLES]) {
+  for (const table of [...SPRINT_1A_TABLES, ...SPRINT_1B_TABLES, ...SPRINT_2_TABLES]) {
     const { error } = await supabase.from(table).select("id").limit(1);
     if (error) {
       if (
@@ -97,7 +99,7 @@ async function verifySupabaseConnection() {
     process.exit(1);
   }
 
-  console.log("✅ Sprint 1A + 1B — tutte le tabelle tour sono accessibili.");
+  console.log("✅ Sprint 1A + 1B + 2 — tutte le tabelle applicative sono accessibili.");
   process.exit(0);
 }
 

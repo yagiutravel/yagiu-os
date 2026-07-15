@@ -1,6 +1,7 @@
 export type GlobalSearchCategoria =
   | "clienti"
   | "tour"
+  | "preventivi"
   | "pagamenti"
   | "camere"
   | "documenti"

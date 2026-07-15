@@ -3,6 +3,7 @@ import type { GlobalSearchCategoria } from "@/types/global-search";
 export const GLOBAL_SEARCH_CATEGORIA_ORDER: GlobalSearchCategoria[] = [
   "clienti",
   "tour",
+  "preventivi",
   "pagamenti",
   "camere",
   "documenti",
@@ -17,6 +18,7 @@ export const GLOBAL_SEARCH_CATEGORIA_LABELS: Record<
 > = {
   clienti: "Clienti",
   tour: "Tour",
+  preventivi: "Preventivi",
   pagamenti: "Pagamenti",
   camere: "Camere",
   documenti: "Documenti",

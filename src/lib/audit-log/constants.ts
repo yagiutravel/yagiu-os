@@ -14,6 +14,7 @@ export const AUDIT_LOG_TIPO_FILTRI: Array<{
   { value: "comunicazione", label: "Comunicazione" },
   { value: "template_email", label: "Template email" },
   { value: "checklist", label: "Checklist" },
+  { value: "preventivo", label: "Preventivo" },
   { value: "generale", label: "Generale" },
 ];
 
@@ -27,5 +28,6 @@ export const AUDIT_LOG_TIPO_LABELS: Record<AuditLogEntitaTipo, string> = {
   comunicazione: "Comunicazione",
   template_email: "Template email",
   checklist: "Checklist",
+  preventivo: "Preventivo",
   generale: "Generale",
 };

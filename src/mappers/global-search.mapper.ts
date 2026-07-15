@@ -14,6 +14,7 @@ import {
   seedClienteQuestionarioMock,
 } from "@/mock/cliente-questionari";
 import { listAllPagamenti } from "@/services/pagamento.service";
+import { listPreventivi } from "@/services/preventivo.service";
 import { listAllTourDocumenti } from "@/services/tour-documento.service";
 import { listAllRooms } from "@/services/camera.service";
 import { getTours } from "@/services/tour.service";
@@ -42,6 +43,15 @@ function buildDynamicEntries(
   camere: Camera[],
   pagamenti: Array<{ id: string; tourId: string; tipo: string; importo: number; metodo: string; data: string }>,
   documentiTour: Array<{ id: string; tourId: string; nome: string; categoria: string }>,
+  preventivi: Array<{
+    id: string;
+    numero: string;
+    titolo: string;
+    clienteNome: string;
+    tourNome: string | null;
+    stato: string;
+    totale: number;
+  }>,
 ): GlobalSearchIndexEntry[] {
   const entries: GlobalSearchIndexEntry[] = [];
 
@@ -147,6 +157,25 @@ function buildDynamicEntries(
     );
   }
 
+  for (const preventivo of preventivi) {
+    entries.push(
+      createSearchEntry(
+        "preventivi",
+        preventivo.id,
+        `${preventivo.numero} — ${preventivo.clienteNome}`,
+        `${preventivo.stato} · € ${preventivo.totale}`,
+        `/preventivi/${preventivo.id}`,
+        [
+          preventivo.numero,
+          preventivo.titolo,
+          preventivo.clienteNome,
+          preventivo.tourNome ?? "",
+          preventivo.stato,
+        ],
+      ),
+    );
+  }
+
   for (const documento of listDocumentiMock()) {
     entries.push(
       createSearchEntry(
@@ -212,15 +241,25 @@ export async function buildGlobalSearchIndex(): Promise<GlobalSearchIndex> {
     nome: string;
     categoria: string;
   }> = [];
+  let preventivi: Array<{
+    id: string;
+    numero: string;
+    titolo: string;
+    clienteNome: string;
+    tourNome: string | null;
+    stato: string;
+    totale: number;
+  }> = [];
 
   try {
-    const [clientiData, toursData, camereData, pagamentiData, documentiData] =
+    const [clientiData, toursData, camereData, pagamentiData, documentiData, preventiviData] =
       await Promise.all([
       getClienti(),
       getTours(),
       listAllRooms(),
       listAllPagamenti(),
       listAllTourDocumenti(),
+      listPreventivi(),
     ]);
     clienti = clientiData.map((item) => ({
       id: item.id,
@@ -244,17 +283,27 @@ export async function buildGlobalSearchIndex(): Promise<GlobalSearchIndex> {
       nome: item.nome,
       categoria: item.categoria,
     }));
+    preventivi = preventiviData.map((item) => ({
+      id: item.id,
+      numero: item.numero,
+      titolo: item.titolo,
+      clienteNome: item.clienteNome,
+      tourNome: item.tourNome,
+      stato: item.stato,
+      totale: item.totale,
+    }));
   } catch {
     clienti = [];
     tours = [];
     camere = [];
     pagamenti = [];
     documentiTour = [];
+    preventivi = [];
   }
 
   return dedupeEntries([
     ...GLOBAL_SEARCH_STATIC_ENTRIES,
-    ...buildDynamicEntries(clienti, tours, camere, pagamenti, documentiTour),
+    ...buildDynamicEntries(clienti, tours, camere, pagamenti, documentiTour, preventivi),
   ]);
 }
 

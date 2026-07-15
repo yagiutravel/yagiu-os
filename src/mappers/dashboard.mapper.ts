@@ -24,6 +24,7 @@ import type {
   DashboardGreeting,
   DashboardKpi,
   DashboardPagamenti,
+  DashboardPreventivi,
   DashboardSearchIndex,
   DashboardSearchResult,
   DashboardTourInPartenza,
@@ -38,6 +39,9 @@ type DashboardAggregationInput = {
   partecipazioniByTour: Map<string, PartecipazioneTourView[]>;
   camereByTour: Map<string, CameraView[]>;
   assicurazioniMancanti?: number;
+  preventiviInAttesa?: number;
+  preventiviAccettati?: number;
+  preventiviValoreInAttesa?: number;
   now?: Date;
 };
 
@@ -435,12 +439,14 @@ export function calcolaAttivitaRichiedonoAttenzione(
   documenti: DashboardDocumenti,
   camere: DashboardCamere,
   tourInPartenza: DashboardTourInPartenza[],
+  preventiviInAttesa = 0,
 ): number {
   let count = 0;
   count += pagamenti.accontiMancanti + pagamenti.saldiMancanti;
   count += documenti.passaportiMancanti + documenti.questionariMancanti;
   count += camere.camereIncomplete;
   count += tourInPartenza.filter((item) => item.giorniMancanti <= 7).length;
+  count += preventiviInAttesa;
   return count;
 }
 
@@ -456,6 +462,14 @@ export function mapGreeting(
   };
 }
 
+export function mapPreventivi(input: DashboardAggregationInput): DashboardPreventivi {
+  return {
+    inAttesa: input.preventiviInAttesa ?? 0,
+    accettati: input.preventiviAccettati ?? 0,
+    valoreTotaleInAttesa: input.preventiviValoreInAttesa ?? 0,
+  };
+}
+
 export function mapDashboardData(input: DashboardAggregationInput): DashboardData {
   const { clienti, tours, partecipazioniByTour, camereByTour, now = new Date() } =
     input;
@@ -463,6 +477,7 @@ export function mapDashboardData(input: DashboardAggregationInput): DashboardDat
 
   const tourInPartenza = mapTourInPartenza(tours, now);
   const pagamenti = mapPagamenti(allPartecipazioni);
+  const preventivi = mapPreventivi(input);
   const documenti = mapDocumenti(
     allPartecipazioni,
     input.assicurazioniMancanti ?? 0,
@@ -489,12 +504,14 @@ export function mapDashboardData(input: DashboardAggregationInput): DashboardDat
     documenti,
     camere,
     tourInPartenza,
+    preventivi.inAttesa,
   );
 
   return {
     greeting: mapGreeting(attivitaRichiedonoAttenzione, now),
     tourInPartenza,
     pagamenti,
+    preventivi,
     documenti,
     camere,
     viaggiatori,

@@ -781,6 +781,197 @@ export type Database = {
         };
         Relationships: [];
       };
+      preventivi: {
+        Row: TimestampFields & {
+          id: string;
+          organization_id: string;
+          numero: string;
+          cliente_id: string;
+          tour_id: string | null;
+          titolo: string;
+          stato: string;
+          subtotale_cents: number;
+          tasse_percentuale: number;
+          tasse_cents: number;
+          totale_cents: number;
+          valido_fino: string | null;
+          note: string;
+          partecipante_id: string | null;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          numero: string;
+          cliente_id: string;
+          tour_id?: string | null;
+          titolo?: string;
+          stato?: string;
+          subtotale_cents?: number;
+          tasse_percentuale?: number;
+          tasse_cents?: number;
+          totale_cents?: number;
+          valido_fino?: string | null;
+          note?: string;
+          partecipante_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          organization_id?: string;
+          numero?: string;
+          cliente_id?: string;
+          tour_id?: string | null;
+          titolo?: string;
+          stato?: string;
+          subtotale_cents?: number;
+          tasse_percentuale?: number;
+          tasse_cents?: number;
+          totale_cents?: number;
+          valido_fino?: string | null;
+          note?: string;
+          partecipante_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      preventivo_righe: {
+        Row: TimestampFields & {
+          id: string;
+          organization_id: string;
+          preventivo_id: string;
+          descrizione: string;
+          quantita: number;
+          prezzo_unitario_cents: number;
+          ordine: number;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          preventivo_id: string;
+          descrizione: string;
+          quantita?: number;
+          prezzo_unitario_cents?: number;
+          ordine?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          organization_id?: string;
+          preventivo_id?: string;
+          descrizione?: string;
+          quantita?: number;
+          prezzo_unitario_cents?: number;
+          ordine?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      audit_log: {
+        Row: {
+          id: string;
+          creato_il: string;
+          utente: string;
+          azione: string;
+          tipo: string;
+          azione_tipo: string;
+          entita_id: string | null;
+          entita_label: string;
+          data: string;
+        };
+        Insert: {
+          id?: string;
+          creato_il?: string;
+          utente?: string;
+          azione?: string;
+          tipo: string;
+          azione_tipo: string;
+          entita_id?: string | null;
+          entita_label?: string;
+          data?: string;
+        };
+        Update: {
+          id?: string;
+          creato_il?: string;
+          utente?: string;
+          azione?: string;
+          tipo?: string;
+          azione_tipo?: string;
+          entita_id?: string | null;
+          entita_label?: string;
+          data?: string;
+        };
+        Relationships: [];
+      };
+      notifiche: {
+        Row: {
+          id: string;
+          creato_il: string;
+          tipo: string;
+          titolo: string;
+          messaggio: string;
+          href: string | null;
+          letta: boolean;
+          data: string;
+        };
+        Insert: {
+          id?: string;
+          creato_il?: string;
+          tipo: string;
+          titolo?: string;
+          messaggio?: string;
+          href?: string | null;
+          letta?: boolean;
+          data?: string;
+        };
+        Update: {
+          id?: string;
+          creato_il?: string;
+          tipo?: string;
+          titolo?: string;
+          messaggio?: string;
+          href?: string | null;
+          letta?: boolean;
+          data?: string;
+        };
+        Relationships: [];
+      };
+      cliente_timeline_eventi: {
+        Row: {
+          id: string;
+          cliente_id: string;
+          creato_il: string;
+          tipo: string;
+          titolo: string;
+          descrizione: string;
+          data: string;
+          utente: string;
+        };
+        Insert: {
+          id?: string;
+          cliente_id: string;
+          creato_il?: string;
+          tipo: string;
+          titolo?: string;
+          descrizione?: string;
+          data?: string;
+          utente?: string;
+        };
+        Update: {
+          id?: string;
+          cliente_id?: string;
+          creato_il?: string;
+          tipo?: string;
+          titolo?: string;
+          descrizione?: string;
+          data?: string;
+          utente?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: {
       tour_stats: {
@@ -880,3 +1071,12 @@ export type TourInsuranceInsert =
   Database["public"]["Tables"]["tour_insurances"]["Insert"];
 export type TourInsuranceUpdate =
   Database["public"]["Tables"]["tour_insurances"]["Update"];
+export type PreventivoRow = Database["public"]["Tables"]["preventivi"]["Row"];
+export type PreventivoInsert = Database["public"]["Tables"]["preventivi"]["Insert"];
+export type PreventivoUpdate = Database["public"]["Tables"]["preventivi"]["Update"];
+export type PreventivoRigaRow =
+  Database["public"]["Tables"]["preventivo_righe"]["Row"];
+export type PreventivoRigaInsert =
+  Database["public"]["Tables"]["preventivo_righe"]["Insert"];
+export type PreventivoRigaUpdate =
+  Database["public"]["Tables"]["preventivo_righe"]["Update"];

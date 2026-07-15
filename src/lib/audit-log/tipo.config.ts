@@ -88,6 +88,13 @@ export const AUDIT_LOG_TIPO_CONFIG: Record<
     text: "text-orange-700",
     ring: "ring-orange-600/15",
   },
+  preventivo: {
+    label: "Preventivo",
+    icon: FileText,
+    bg: "bg-fuchsia-50",
+    text: "text-fuchsia-700",
+    ring: "ring-fuchsia-600/15",
+  },
   generale: {
     label: "Generale",
     icon: Settings,

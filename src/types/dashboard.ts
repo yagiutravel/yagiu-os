@@ -65,7 +65,14 @@ export type DashboardAttivitaTipo =
   | "pagamento"
   | "camera"
   | "cliente"
-  | "partecipante";
+  | "partecipante"
+  | "preventivo";
+
+export type DashboardPreventivi = {
+  inAttesa: number;
+  accettati: number;
+  valoreTotaleInAttesa: number;
+};
 
 export type DashboardAttivita = {
   id: string;
@@ -133,6 +140,7 @@ export type DashboardData = {
   greeting: DashboardGreeting;
   tourInPartenza: DashboardTourInPartenza[];
   pagamenti: DashboardPagamenti;
+  preventivi: DashboardPreventivi;
   documenti: DashboardDocumenti;
   camere: DashboardCamere;
   viaggiatori: DashboardViaggiatori;

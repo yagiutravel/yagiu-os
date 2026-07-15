@@ -4,7 +4,11 @@ export type NotificaTipo =
   | "tour_partenza"
   | "camera_incompleta"
   | "pagamento_ricevuto"
-  | "cliente_nuovo";
+  | "cliente_nuovo"
+  | "preventivo_creato"
+  | "preventivo_inviato"
+  | "preventivo_accettato"
+  | "preventivo_convertito";
 
 export type NotificaStatoFiltro = "tutte" | "lette" | "non_lette";
 

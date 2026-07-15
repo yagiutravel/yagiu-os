@@ -8,6 +8,7 @@ export type AuditLogEntitaTipo =
   | "comunicazione"
   | "template_email"
   | "checklist"
+  | "preventivo"
   | "generale";
 
 export type AuditLogAzioneTipo =

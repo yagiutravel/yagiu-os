@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
-import { BedDouble, Compass, Plus, UserPlus, Users } from "lucide-react";
+import { BedDouble, Compass, FileText, Plus, UserPlus, Users } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { useToast } from "@/components/ui/Toast";
 import { useClientiModal } from "@/hooks/useClientiModal";
@@ -33,7 +33,7 @@ import type { Tour } from "@/types/tour";
 import { DashboardWidget } from "./DashboardWidget";
 import { getErrorMessage } from "@/shared/utils/error";
 
-type QuickAction = "cliente" | "tour" | "camera" | "partecipante";
+type QuickAction = "cliente" | "tour" | "camera" | "partecipante" | "preventivo";
 
 type TourAction = "camera" | "partecipante";
 
@@ -184,12 +184,8 @@ export function DashboardQuickActions() {
       icon: BedDouble,
       onClick: () => openTourPicker("camera"),
     },
-    {
-      id: "partecipante",
-      label: "Aggiungi Partecipante",
-      icon: Users,
-      onClick: () => openTourPicker("partecipante"),
-    },
+    { id: "partecipante", label: "Aggiungi Partecipante", icon: Users, onClick: () => openTourPicker("partecipante") },
+    { id: "preventivo", label: "Nuovo Preventivo", icon: FileText, onClick: () => router.push("/preventivi/nuovo") },
   ];
 
   return (
