@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, startTransition } from "react";
 import { FileText } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -39,7 +39,9 @@ export function ClienteSchedaDocumenti({
   }, [clienteId, showToast]);
 
   useEffect(() => {
-    void loadData();
+    startTransition(() => {
+      void loadData();
+    });
   }, [loadData]);
 
   return (

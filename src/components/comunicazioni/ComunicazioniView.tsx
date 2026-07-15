@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, startTransition } from "react";
 import { Spinner } from "@/components/ui/Spinner";
 import { useToast } from "@/components/ui/Toast";
 import { profiloContentWrap } from "@/lib/clienti/profilo-ui";
@@ -35,7 +35,9 @@ export function ComunicazioniView() {
   }, [showToast]);
 
   useEffect(() => {
-    void loadData();
+    startTransition(() => {
+      void loadData();
+    });
   }, [loadData]);
 
   return (

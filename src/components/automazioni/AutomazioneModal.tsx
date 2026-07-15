@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { startTransition, useEffect, useState } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -43,8 +43,10 @@ export function AutomazioneModal({
 
   useEffect(() => {
     if (!open) return;
-    setForm(EMPTY_AUTOMAZIONE_FORM);
-    setErrors({});
+    startTransition(() => {
+      setForm(EMPTY_AUTOMAZIONE_FORM);
+      setErrors({});
+    });
   }, [open]);
 
   const handleTriggerChange = (trigger: AutomazioneTrigger | "") => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, startTransition } from "react";
 import { Paperclip, X } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
@@ -68,12 +68,14 @@ export function ClienteInviaEmailModal({
   useEffect(() => {
     if (!open) return;
 
-    setForm({
-      ...EMPTY_INVIA_EMAIL_FORM,
-      destinatario: destinatarioDefault,
+    startTransition(() => {
+      setForm({
+        ...EMPTY_INVIA_EMAIL_FORM,
+        destinatario: destinatarioDefault,
+      });
+      setErrors({});
+      void loadTemplates();
     });
-    setErrors({});
-    void loadTemplates();
   }, [open, destinatarioDefault, loadTemplates]);
 
   const handleTemplateChange = (templateId: string) => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, startTransition } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, Mail, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/Button";
@@ -74,7 +74,9 @@ export function ClienteSchedaView() {
   }, [clienteId, showToast]);
 
   useEffect(() => {
-    void loadCliente();
+    startTransition(() => {
+      void loadCliente();
+    });
   }, [loadCliente]);
 
   const handleIndietro = useCallback(() => {

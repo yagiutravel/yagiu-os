@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { startTransition, useEffect, useState } from "react";
 
 const DEFAULT_SHORTCUT_LABEL = "⌘K";
 
@@ -17,7 +17,9 @@ export function useKeyboardShortcutLabel(): string {
   const [label, setLabel] = useState(DEFAULT_SHORTCUT_LABEL);
 
   useEffect(() => {
-    setLabel(resolveShortcutLabel());
+    startTransition(() => {
+      setLabel(resolveShortcutLabel());
+    });
   }, []);
 
   return label;

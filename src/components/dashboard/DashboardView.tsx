@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, startTransition } from "react";
 import { AlertCircle } from "lucide-react";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Spinner } from "@/components/ui/Spinner";
@@ -46,12 +46,16 @@ export function DashboardView() {
   }, [showToast]);
 
   useEffect(() => {
-    setMounted(true);
+    startTransition(() => {
+      setMounted(true);
+    });
   }, []);
 
   useEffect(() => {
     if (!mounted) return;
-    void loadDashboard();
+    startTransition(() => {
+      void loadDashboard();
+    });
   }, [mounted, loadDashboard]);
 
   return (

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, startTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, SearchX, Users } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -74,7 +74,9 @@ export function ClientiView() {
   }, [showToast]);
 
   useEffect(() => {
-    void loadClienti();
+    startTransition(() => {
+      void loadClienti();
+    });
   }, [loadClienti]);
 
   const sortConfig = useMemo(

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, startTransition } from "react";
 import { FileText, Plus, SearchX } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
@@ -69,7 +69,9 @@ export function EmailTemplateView() {
   }, [showToast]);
 
   useEffect(() => {
-    void loadTemplates();
+    startTransition(() => {
+      void loadTemplates();
+    });
   }, [loadTemplates]);
 
   const filteredTemplates = useMemo(

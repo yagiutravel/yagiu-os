@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { startTransition, useEffect, useState } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -45,14 +45,16 @@ export function SchedulazioneModal({
 
   useEffect(() => {
     if (!open) return;
-    setForm(EMPTY_SCHEDULAZIONE_FORM);
-    setErrors({});
-    void Promise.all([getSchedulazioneClienti(), getSchedulazioneTours()]).then(
-      ([c, t]) => {
-        setClienti(c);
-        setTours(t);
-      },
-    );
+    startTransition(() => {
+      setForm(EMPTY_SCHEDULAZIONE_FORM);
+      setErrors({});
+      void Promise.all([getSchedulazioneClienti(), getSchedulazioneTours()]).then(
+        ([c, t]) => {
+          setClienti(c);
+          setTours(t);
+        },
+      );
+    });
   }, [open]);
 
   const handleSubmit = async (event: React.FormEvent) => {

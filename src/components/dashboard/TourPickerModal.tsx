@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { startTransition, useEffect, useState } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
@@ -26,10 +26,12 @@ export function TourPickerModal({
 
   useEffect(() => {
     if (!open) return;
-    setLoading(true);
-    void getActiveTours()
-      .then(setTours)
-      .finally(() => setLoading(false));
+    startTransition(() => {
+      setLoading(true);
+      void getActiveTours()
+        .then(setTours)
+        .finally(() => setLoading(false));
+    });
   }, [open]);
 
   return (

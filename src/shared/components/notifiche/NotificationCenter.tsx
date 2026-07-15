@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, startTransition } from "react";
 import { Bell, CheckCheck } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Spinner } from "@/components/ui/Spinner";
@@ -44,7 +44,9 @@ export function NotificationCenter() {
   }, []);
 
   useEffect(() => {
-    void loadNotifiche();
+    startTransition(() => {
+      void loadNotifiche();
+    });
   }, [loadNotifiche]);
 
   useEffect(() => {

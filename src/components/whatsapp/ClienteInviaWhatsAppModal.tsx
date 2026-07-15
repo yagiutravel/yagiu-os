@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { startTransition, useEffect, useMemo, useRef, useState } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { Select } from "@/components/ui/Select";
@@ -59,9 +59,11 @@ export function ClienteInviaWhatsAppModal({
 
   useEffect(() => {
     if (!open) return;
-    setForm(EMPTY_INVIA_WHATSAPP_FORM);
-    setErrors({});
-    void getWhatsAppTemplates().then(setTemplates);
+    startTransition(() => {
+      setForm(EMPTY_INVIA_WHATSAPP_FORM);
+      setErrors({});
+      void getWhatsAppTemplates().then(setTemplates);
+    });
   }, [open]);
 
   const handleTemplateChange = (templateId: string) => {

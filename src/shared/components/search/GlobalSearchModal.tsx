@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { startTransition, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
 import { Spinner } from "@/components/ui/Spinner";
@@ -23,8 +23,10 @@ export function GlobalSearchModal() {
 
   useEffect(() => {
     if (!open) {
-      setQuery("");
-      setResponse(null);
+      startTransition(() => {
+        setQuery("");
+        setResponse(null);
+      });
       return;
     }
 
@@ -46,7 +48,9 @@ export function GlobalSearchModal() {
   useEffect(() => {
     const normalized = query.trim();
     if (!normalized) {
-      setResponse(null);
+      startTransition(() => {
+        setResponse(null);
+      });
       return;
     }
 

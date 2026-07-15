@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, startTransition } from "react";
 import { ClipboardList, SearchX } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -40,7 +40,9 @@ export function AuditLogView() {
   }, [showToast]);
 
   useEffect(() => {
-    void loadEntries();
+    startTransition(() => {
+      void loadEntries();
+    });
   }, [loadEntries]);
 
   const filteredEntries = useMemo(

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { startTransition, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Search, User, Compass, Users } from "lucide-react";
 import { searchDashboard } from "@/services/dashboard.service";
@@ -30,7 +30,9 @@ export function DashboardGlobalSearch() {
   useEffect(() => {
     const normalized = query.trim();
     if (!normalized) {
-      setResults([]);
+      startTransition(() => {
+        setResults([]);
+      });
       return;
     }
 

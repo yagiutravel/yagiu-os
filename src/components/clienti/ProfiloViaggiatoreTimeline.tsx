@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, startTransition } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/Card";
 import { Spinner } from "@/components/ui/Spinner";
 import { useToast } from "@/components/ui/Toast";
@@ -43,7 +43,9 @@ export function ProfiloViaggiatoreTimeline({
   }, [profilo.id, profilo.profilo.nomeCompleto, showToast]);
 
   useEffect(() => {
-    void loadTimeline();
+    startTransition(() => {
+      void loadTimeline();
+    });
   }, [loadTimeline, refreshKey]);
 
   return (
