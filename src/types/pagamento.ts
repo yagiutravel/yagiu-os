@@ -65,15 +65,15 @@ export type TourPagamentiData = {
   riepilogo: TourPagamentiRiepilogo;
 };
 
-/** Shape prevista per Supabase — non collegata ancora. */
+/** Shape Supabase `tour_payments`. */
 export type PagamentoRow = {
   id: string;
   tour_id: string;
-  partecipazione_id: string;
-  importo: number;
+  participant_id: string;
+  importo_cents: number;
   data: string;
-  metodo: MetodoPagamento;
-  tipo: TipoPagamento;
-  creato_il: string;
-  aggiornato_il: string;
+  metodo: string;
+  tipo: string;
+  created_at: string;
+  updated_at: string;
 };

@@ -6,11 +6,13 @@ import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { TIPOLOGIA_CAMERA_OPTIONS } from "@/models/camera";
 import type { CameraForm } from "@/types/camera";
+import type { TourHotel } from "@/types/tour-hotel";
 
 type TourCameraModalProps = {
   open: boolean;
   mode: "create" | "edit";
   form: CameraForm;
+  hotels?: TourHotel[];
   loading: boolean;
   error?: string;
   onClose: () => void;
@@ -22,6 +24,7 @@ export function TourCameraModal({
   open,
   mode,
   form,
+  hotels = [],
   loading,
   error,
   onClose,
@@ -42,6 +45,23 @@ export function TourCameraModal({
       title={mode === "create" ? "Nuova camera" : "Modifica camera"}
     >
       <form onSubmit={onSubmit} className="space-y-4" noValidate>
+        {hotels.length > 0 && (
+          <Select
+            label="Hotel"
+            name="hotelId"
+            value={form.hotelId}
+            options={[
+              { value: "", label: "Nessun hotel" },
+              ...hotels.map((hotel) => ({
+                value: hotel.id,
+                label: hotel.nome,
+              })),
+            ]}
+            disabled={loading}
+            onChange={(event) => updateField("hotelId", event.target.value)}
+          />
+        )}
+
         <Input
           label="Numero camera"
           name="numero"

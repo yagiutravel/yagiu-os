@@ -1,5 +1,5 @@
-import { getTourSync } from "@/services/tour.service";
 import type { Cliente } from "@/types/cliente";
+import type { Tour } from "@/types/tour";
 import type {
   PartecipazioneTour,
   PartecipazioneTourView,
@@ -41,8 +41,9 @@ export function mapPartecipazioniToViews(
 
 export function mapPartecipazioneToTourClienteView(
   partecipazione: PartecipazioneTour,
+  toursById: Map<string, Tour>,
 ): TourClienteView | null {
-  const tour = getTourSync(partecipazione.tourId);
+  const tour = toursById.get(partecipazione.tourId);
   if (!tour) return null;
 
   const anno = new Date(`${tour.dataPartenza}T00:00:00`).getFullYear();
@@ -58,11 +59,14 @@ export function mapPartecipazioneToTourClienteView(
   };
 }
 
-export function mapPartecipazioniToTourClienteViews(
+export function mapPartecipazioniToTourClienteViewsWithTours(
   partecipazioni: PartecipazioneTour[],
+  tours: Tour[],
 ): TourClienteView[] {
+  const toursById = new Map(tours.map((tour) => [tour.id, tour]));
+
   return partecipazioni
-    .map(mapPartecipazioneToTourClienteView)
+    .map((item) => mapPartecipazioneToTourClienteView(item, toursById))
     .filter((item): item is TourClienteView => item !== null)
     .sort((a, b) => b.anno - a.anno);
 }

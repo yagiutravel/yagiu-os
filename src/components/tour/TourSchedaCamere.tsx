@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, startTransition } from "react";
 import { BedDouble, Plus } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -24,6 +24,7 @@ import {
   updateCamera,
 } from "@/services/camera.service";
 import { getPartecipazioniByTourId } from "@/services/tour-partecipazione.service";
+import { getHotelsByTourId } from "@/services/tour-hotel.service";
 import type {
   CameraForm,
   CameraPartecipanteView,
@@ -32,8 +33,10 @@ import type {
 } from "@/types/camera";
 import { computeRoomingRiepilogo } from "@/mappers/camera.mapper";
 import type { PartecipazioneTourView } from "@/types/tour-partecipazione";
+import type { TourHotel } from "@/types/tour-hotel";
 import { TourCameraCard } from "./TourCameraCard";
 import { TourCameraModal } from "./TourCameraModal";
+import { TourHotelSection } from "./TourHotelSection";
 import { TourRoomingRiepilogo } from "./TourRoomingRiepilogo";
 import { PartecipanteCameraSearchSelect } from "./PartecipanteCameraSearchSelect";
 import { TourSpostaPartecipanteModal } from "./TourSpostaPartecipanteModal";
@@ -68,6 +71,7 @@ export function TourSchedaCamere({ tourId }: TourSchedaCamereProps) {
   const { showToast } = useToast();
 
   const [camere, setCamere] = useState<CameraView[]>([]);
+  const [hotels, setHotels] = useState<TourHotel[]>([]);
   const [partecipanti, setPartecipanti] = useState<PartecipazioneTourView[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -81,12 +85,14 @@ export function TourSchedaCamere({ tourId }: TourSchedaCamereProps) {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [camereData, partecipantiData] = await Promise.all([
+      const [camereData, partecipantiData, hotelsData] = await Promise.all([
         getCamereByTourId(tourId),
         getPartecipazioniByTourId(tourId),
+        getHotelsByTourId(tourId),
       ]);
       setCamere(camereData);
       setPartecipanti(partecipantiData);
+      setHotels(hotelsData);
     } catch (error) {
       showToast(`Impossibile caricare le camere. ${getErrorMessage(error)}`, "error");
     } finally {
@@ -95,7 +101,9 @@ export function TourSchedaCamere({ tourId }: TourSchedaCamereProps) {
   }, [showToast, tourId]);
 
   useEffect(() => {
-    void loadData();
+    startTransition(() => {
+      void loadData();
+    });
   }, [loadData]);
 
   const riepilogo: RoomingRiepilogo = useMemo(
@@ -314,6 +322,13 @@ export function TourSchedaCamere({ tourId }: TourSchedaCamereProps) {
   return (
     <>
       <div className="space-y-6">
+        <TourHotelSection
+          tourId={tourId}
+          onHotelsChanged={() => {
+            void getHotelsByTourId(tourId).then(setHotels);
+          }}
+        />
+
         <Card>
           <CardHeader
             title="Rooming List"
@@ -370,6 +385,7 @@ export function TourSchedaCamere({ tourId }: TourSchedaCamereProps) {
           open
           mode={modal.type === "createCamera" ? "create" : "edit"}
           form={cameraForm}
+          hotels={hotels}
           loading={saving}
           error={formError}
           onClose={handleCloseModal}

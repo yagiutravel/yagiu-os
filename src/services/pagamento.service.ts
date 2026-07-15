@@ -1,15 +1,17 @@
-import { mapTourPagamentiData } from "@/mappers/pagamento.mapper";
+import { getSupabaseClient } from "@/config/supabase";
+import { getOrganizationId } from "@/config/organization";
 import {
-  deletePagamentoMock,
-  findPagamentoByIdMock,
-  insertPagamentoMock,
-  listPagamentiByTourIdMock,
-  seedPagamentiMock,
-  updatePagamentoMock,
-} from "@/mock/pagamenti";
-import { listPartecipazioniMock } from "@/mock/tour-partecipazioni";
+  mapCreatePagamentoInputToInsert,
+  mapTourPaymentRowToPagamento,
+  mapUpdatePagamentoInputToUpdate,
+} from "@/mappers/tour-payment.mapper";
+import {
+  mapTourPagamentiData,
+} from "@/mappers/pagamento.mapper";
+import { recordTourTimelineEvent } from "@/services/tour-timeline.service";
 import { getPartecipazioniByTourId } from "@/services/tour-partecipazione.service";
-import { getActiveTours, getTourSync } from "@/services/tour.service";
+import { getActiveTours, getTour } from "@/services/tour.service";
+import type { TourPaymentRow } from "@/types/database";
 import type { TourStato } from "@/types/tour";
 import type {
   CreatePagamentoInput,
@@ -26,38 +28,68 @@ export class PagamentoServiceError extends Error {
   }
 }
 
-async function ensurePagamentiSeeded(tourId: string) {
-  await getPartecipazioniByTourId(tourId);
-  seedPagamentiMock(listPartecipazioniMock());
+const TABLE = "tour_payments";
+
+function handleSupabaseError(operation: string, error: { message: string; code?: string }) {
+  throw new PagamentoServiceError(
+    `[${operation}] ${error.message}${error.code ? ` (${error.code})` : ""}`,
+  );
 }
 
-function getPrezzoTour(tourId: string): string {
-  const tour = getTourSync(tourId);
-  return tour?.prezzo ?? "€ 0";
+async function fetchPagamentiByTourId(tourId: string): Promise<Pagamento[]> {
+  const organizationId = await getOrganizationId();
+  const supabase = getSupabaseClient();
+
+  const { data, error } = await supabase
+    .from(TABLE)
+    .select("*")
+    .eq("organization_id", organizationId)
+    .eq("tour_id", tourId)
+    .order("data", { ascending: false });
+
+  if (error) handleSupabaseError("fetchPagamentiByTourId", error);
+
+  return ((data ?? []) as TourPaymentRow[]).map(mapTourPaymentRowToPagamento);
 }
 
 async function buildTourPagamentiData(tourId: string): Promise<TourPagamentiData> {
-  const partecipazioni = await getPartecipazioniByTourId(tourId);
-  const pagamenti = listPagamentiByTourIdMock(tourId);
+  const [partecipazioni, pagamenti, tour] = await Promise.all([
+    getPartecipazioniByTourId(tourId),
+    fetchPagamentiByTourId(tourId),
+    getTour(tourId),
+  ]);
+
   return mapTourPagamentiData(
     partecipazioni,
     pagamenti,
-    getPrezzoTour(tourId),
+    tour?.prezzo ?? "€ 0",
   );
 }
 
 export async function getPagamentiByTourId(
   tourId: string,
 ): Promise<TourPagamentiData> {
-  await ensurePagamentiSeeded(tourId);
   return buildTourPagamentiData(tourId);
+}
+
+export async function listAllPagamenti(): Promise<Pagamento[]> {
+  const organizationId = await getOrganizationId();
+  const supabase = getSupabaseClient();
+
+  const { data, error } = await supabase
+    .from(TABLE)
+    .select("*")
+    .eq("organization_id", organizationId)
+    .order("data", { ascending: false });
+
+  if (error) handleSupabaseError("listAllPagamenti", error);
+
+  return ((data ?? []) as TourPaymentRow[]).map(mapTourPaymentRowToPagamento);
 }
 
 export async function createPagamento(
   input: CreatePagamentoInput,
 ): Promise<TourPagamentiData> {
-  await ensurePagamentiSeeded(input.tourId);
-
   if (!input.importo || input.importo <= 0) {
     throw new PagamentoServiceError("Inserisci un importo valido.");
   }
@@ -66,7 +98,22 @@ export async function createPagamento(
     throw new PagamentoServiceError("Inserisci la data del pagamento.");
   }
 
-  insertPagamentoMock(input);
+  const organizationId = await getOrganizationId();
+  const supabase = getSupabaseClient();
+
+  const { error } = await supabase
+    .from(TABLE)
+    .insert(mapCreatePagamentoInputToInsert(input, organizationId));
+
+  if (error) handleSupabaseError("createPagamento", error);
+
+  await recordTourTimelineEvent({
+    tourId: input.tourId,
+    tipo: "pagamento",
+    titolo: `${input.tipo} registrato`,
+    descrizione: `Pagamento di € ${input.importo} tramite ${input.metodo}.`,
+  });
+
   return buildTourPagamentiData(input.tourId);
 }
 
@@ -74,44 +121,80 @@ export async function updatePagamento(
   id: string,
   input: UpdatePagamentoInput,
 ): Promise<TourPagamentiData> {
-  const current = findPagamentoByIdMock(id);
-  if (!current) {
-    throw new PagamentoServiceError("Pagamento non trovato.");
-  }
-
   if (input.importo !== undefined && input.importo <= 0) {
     throw new PagamentoServiceError("Inserisci un importo valido.");
   }
 
-  const updated = updatePagamentoMock(id, input);
-  if (!updated) {
-    throw new PagamentoServiceError("Pagamento non trovato.");
-  }
+  const organizationId = await getOrganizationId();
+  const supabase = getSupabaseClient();
 
-  return buildTourPagamentiData(current.tourId);
-}
+  const { data: current, error: fetchError } = await supabase
+    .from(TABLE)
+    .select("tour_id")
+    .eq("id", id)
+    .eq("organization_id", organizationId)
+    .maybeSingle();
 
-export async function deletePagamento(id: string): Promise<TourPagamentiData> {
-  const current = findPagamentoByIdMock(id);
+  if (fetchError) handleSupabaseError("updatePagamentoFetch", fetchError);
   if (!current) {
     throw new PagamentoServiceError("Pagamento non trovato.");
   }
 
-  const deleted = deletePagamentoMock(id);
-  if (!deleted) {
+  const { error } = await supabase
+    .from(TABLE)
+    .update(mapUpdatePagamentoInputToUpdate(input))
+    .eq("id", id)
+    .eq("organization_id", organizationId);
+
+  if (error) handleSupabaseError("updatePagamento", error);
+
+  return buildTourPagamentiData(current.tour_id as string);
+}
+
+export async function deletePagamento(id: string): Promise<TourPagamentiData> {
+  const organizationId = await getOrganizationId();
+  const supabase = getSupabaseClient();
+
+  const { data: current, error: fetchError } = await supabase
+    .from(TABLE)
+    .select("tour_id")
+    .eq("id", id)
+    .eq("organization_id", organizationId)
+    .maybeSingle();
+
+  if (fetchError) handleSupabaseError("deletePagamentoFetch", fetchError);
+  if (!current) {
     throw new PagamentoServiceError("Pagamento non trovato.");
   }
 
-  return buildTourPagamentiData(current.tourId);
+  const { error } = await supabase
+    .from(TABLE)
+    .delete()
+    .eq("id", id)
+    .eq("organization_id", organizationId);
+
+  if (error) handleSupabaseError("deletePagamento", error);
+
+  return buildTourPagamentiData(current.tour_id as string);
 }
 
 export async function getPagamentoById(
   id: string,
 ): Promise<Pagamento | null> {
-  const pagamento = findPagamentoByIdMock(id);
-  if (!pagamento) return null;
-  await ensurePagamentiSeeded(pagamento.tourId);
-  return pagamento;
+  const organizationId = await getOrganizationId();
+  const supabase = getSupabaseClient();
+
+  const { data, error } = await supabase
+    .from(TABLE)
+    .select("*")
+    .eq("id", id)
+    .eq("organization_id", organizationId)
+    .maybeSingle();
+
+  if (error) handleSupabaseError("getPagamentoById", error);
+  if (!data) return null;
+
+  return mapTourPaymentRowToPagamento(data as TourPaymentRow);
 }
 
 export type PagamentoOverviewItem = {

@@ -84,6 +84,13 @@ export {
 } from "@/services/tour.service";
 
 export {
+  getHotelsByTourId,
+  createHotel,
+  updateHotel,
+  deleteHotel,
+} from "@/services/tour-hotel.service";
+
+export {
   organizationService,
   workspaceService,
   membershipService,

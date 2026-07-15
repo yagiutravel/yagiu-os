@@ -13,13 +13,10 @@ import {
   listQuestionariMock,
   seedClienteQuestionarioMock,
 } from "@/mock/cliente-questionari";
-import { listPagamentiMock, seedPagamentiMock } from "@/mock/pagamenti";
-import { listCamereMock, seedCamereMock } from "@/mock/camere";
-import {
-  listPartecipazioniMock,
-  seedPartecipazioniMock,
-} from "@/mock/tour-partecipazioni";
-import { getToursSync } from "@/services/tour.service";
+import { listAllPagamenti } from "@/services/pagamento.service";
+import { listAllTourDocumenti } from "@/services/tour-documento.service";
+import { listAllRooms } from "@/services/camera.service";
+import { getTours } from "@/services/tour.service";
 import { getClienti } from "@/services/clienti.service";
 import type {
   GlobalSearchGroup,
@@ -27,6 +24,8 @@ import type {
   GlobalSearchIndexEntry,
   GlobalSearchResponse,
 } from "@/types/global-search";
+import type { Tour } from "@/types/tour";
+import type { Camera } from "@/types/camera";
 
 function dedupeEntries(entries: GlobalSearchIndexEntry[]): GlobalSearchIndexEntry[] {
   const seen = new Set<string>();
@@ -39,6 +38,10 @@ function dedupeEntries(entries: GlobalSearchIndexEntry[]): GlobalSearchIndexEntr
 
 function buildDynamicEntries(
   clienti: Array<{ id: string; nome: string; email: string; stato: string }>,
+  tours: Tour[],
+  camere: Camera[],
+  pagamenti: Array<{ id: string; tourId: string; tipo: string; importo: number; metodo: string; data: string }>,
+  documentiTour: Array<{ id: string; tourId: string; nome: string; categoria: string }>,
 ): GlobalSearchIndexEntry[] {
   const entries: GlobalSearchIndexEntry[] = [];
 
@@ -75,24 +78,8 @@ function buildDynamicEntries(
     );
   }
 
-  if (clienti.length > 0) {
-    seedPartecipazioniMock(
-      clienti.map((item) => ({
-        id: item.id,
-        nome: item.nome,
-        email: item.email,
-        telefono: "",
-        azienda: "",
-        stato: item.stato as "Attivo" | "Inattivo" | "Prospect",
-        creatoIl: new Date().toISOString(),
-      })),
-    );
-    seedPagamentiMock(listPartecipazioniMock());
-    seedCamereMock(listPartecipazioniMock());
-  }
-
-  const tours = getToursSync().filter((tour) => tour.stato !== "Archiviato");
-  for (const tour of tours) {
+  const activeTours = tours.filter((tour) => tour.stato !== "Archiviato");
+  for (const tour of activeTours) {
     entries.push(
       createSearchEntry(
         "tour",
@@ -121,7 +108,7 @@ function buildDynamicEntries(
     );
   }
 
-  for (const pagamento of listPagamentiMock()) {
+  for (const pagamento of pagamenti) {
     entries.push(
       createSearchEntry(
         "pagamenti",
@@ -134,7 +121,20 @@ function buildDynamicEntries(
     );
   }
 
-  for (const camera of listCamereMock()) {
+  for (const documento of documentiTour) {
+    entries.push(
+      createSearchEntry(
+        "documenti",
+        documento.id,
+        `${documento.categoria} — ${documento.nome}`,
+        `Documento tour`,
+        `/tour/${documento.tourId}`,
+        [documento.categoria, documento.nome],
+      ),
+    );
+  }
+
+  for (const camera of camere) {
     entries.push(
       createSearchEntry(
         "camere",
@@ -196,22 +196,65 @@ function buildDynamicEntries(
 export async function buildGlobalSearchIndex(): Promise<GlobalSearchIndex> {
   let clienti: Array<{ id: string; nome: string; email: string; stato: string }> =
     [];
+  let tours: Tour[] = [];
+  let camere: Camera[] = [];
+  let pagamenti: Array<{
+    id: string;
+    tourId: string;
+    tipo: string;
+    importo: number;
+    metodo: string;
+    data: string;
+  }> = [];
+  let documentiTour: Array<{
+    id: string;
+    tourId: string;
+    nome: string;
+    categoria: string;
+  }> = [];
 
   try {
-    const data = await getClienti();
-    clienti = data.map((item) => ({
+    const [clientiData, toursData, camereData, pagamentiData, documentiData] =
+      await Promise.all([
+      getClienti(),
+      getTours(),
+      listAllRooms(),
+      listAllPagamenti(),
+      listAllTourDocumenti(),
+    ]);
+    clienti = clientiData.map((item) => ({
       id: item.id,
       nome: item.nome,
       email: item.email,
       stato: item.stato,
     }));
+    tours = toursData;
+    camere = camereData;
+    pagamenti = pagamentiData.map((item) => ({
+      id: item.id,
+      tourId: item.tourId,
+      tipo: item.tipo,
+      importo: item.importo,
+      metodo: item.metodo,
+      data: item.data,
+    }));
+    documentiTour = documentiData.map((item) => ({
+      id: item.id,
+      tourId: item.tourId,
+      nome: item.nome,
+      categoria: item.categoria,
+    }));
   } catch {
     clienti = [];
+    tours = [];
+    camere = [];
+    pagamenti = [];
+    documentiTour = [];
   }
 
   return dedupeEntries([
     ...GLOBAL_SEARCH_STATIC_ENTRIES,
-    ...buildDynamicEntries(clienti),
+    ...buildDynamicEntries(clienti, tours, camere, pagamenti, documentiTour),
   ]);
 }
 

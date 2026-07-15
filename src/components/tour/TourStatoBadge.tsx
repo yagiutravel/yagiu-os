@@ -6,6 +6,7 @@ type TourStatoBadgeProps = {
 };
 
 const statoStyles: Record<TourStato, string> = {
+  Bozza: "bg-zinc-50 text-zinc-600 ring-zinc-500/10",
   "In vendita": "bg-sky-50 text-sky-700 ring-sky-600/15",
   Completo: "bg-amber-50 text-amber-700 ring-amber-600/15",
   "In corso": "bg-emerald-50 text-emerald-700 ring-emerald-600/15",

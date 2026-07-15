@@ -4,11 +4,13 @@ import type { PartecipazioneTour } from "@/types/tour-partecipazione";
 import type { Tour } from "@/types/tour";
 import type { DomainSnapshot } from "@/domain/types/snapshot";
 import { isTourActive } from "@/domain/helpers/tour";
-import { listCamereMock, listAssegnazioniMock } from "@/mock/camere";
-import { listPartecipazioniMock } from "@/mock/tour-partecipazioni";
-import { getToursSync } from "@/services/tour.service";
+import {
+  listAllRoomAssignments,
+  listAllRooms,
+} from "@/services/camera.service";
 import { getClienti } from "@/services/clienti.service";
-import { getPartecipazioniByTourId } from "@/services/tour-partecipazione.service";
+import { listAllPartecipazioni } from "@/services/tour-partecipazione.service";
+import { getTours } from "@/services/tour.service";
 
 function indexById<T extends { id: string }>(items: T[]): Map<string, T> {
   return new Map(items.map((item) => [item.id, item]));
@@ -117,17 +119,14 @@ export function buildDomainSnapshot(input: {
 
 /** Carica uno snapshot di dominio dai servizi esistenti (read-only). */
 export async function loadDomainSnapshot(): Promise<DomainSnapshot> {
-  const clienti = await getClienti();
-  const tours = getToursSync();
-  const activeTours = tours.filter(isTourActive);
-
-  await Promise.all(
-    activeTours.map((tour) => getPartecipazioniByTourId(tour.id)),
-  );
-
-  const partecipazioni = listPartecipazioniMock();
-  const camere = listCamereMock();
-  const assegnazioni = listAssegnazioniMock();
+  const [clienti, tours, partecipazioni, camere, assegnazioni] =
+    await Promise.all([
+      getClienti(),
+      getTours(),
+      listAllPartecipazioni(),
+      listAllRooms(),
+      listAllRoomAssignments(),
+    ]);
 
   return buildDomainSnapshot({
     clienti,

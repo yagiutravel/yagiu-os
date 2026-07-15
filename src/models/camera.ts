@@ -26,6 +26,7 @@ export const CAPIENZA_BY_TIPOLOGIA: Record<TipologiaCamera, number> = {
 };
 
 export const EMPTY_CAMERA_FORM: CameraForm = {
+  hotelId: "",
   numero: "",
   tipologia: "Doppia",
   note: "",
@@ -58,6 +59,8 @@ export function createCamera(input: CreateCameraInput): Camera {
   return {
     id: createCameraId(),
     tourId: input.tourId,
+    hotelId: input.hotelId ?? null,
+    hotelNome: null,
     numero: input.numero.trim(),
     tipologia: input.tipologia,
     note: input.note?.trim() ?? "",
@@ -80,6 +83,7 @@ export function createCameraAssegnazione(
 
 export function cameraToForm(camera: Camera): CameraForm {
   return {
+    hotelId: camera.hotelId ?? "",
     numero: camera.numero,
     tipologia: camera.tipologia,
     note: camera.note,
@@ -92,6 +96,7 @@ export function formToCreateInput(
 ): CreateCameraInput {
   return {
     tourId,
+    hotelId: form.hotelId.trim() ? form.hotelId : null,
     numero: form.numero,
     tipologia: form.tipologia,
     note: form.note,

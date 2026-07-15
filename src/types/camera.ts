@@ -7,6 +7,8 @@ export type StatoOccupazioneCamera = "Completa" | "Parziale" | "Vuota";
 export type Camera = {
   id: string;
   tourId: string;
+  hotelId: string | null;
+  hotelNome: string | null;
   numero: string;
   tipologia: TipologiaCamera;
   note: string;
@@ -23,6 +25,7 @@ export type CameraAssegnazione = {
 
 export type CreateCameraInput = {
   tourId: string;
+  hotelId?: string | null;
   numero: string;
   tipologia: TipologiaCamera;
   note?: string;
@@ -48,6 +51,7 @@ export type CameraView = Camera & {
 };
 
 export type CameraForm = {
+  hotelId: string;
   numero: string;
   tipologia: TipologiaCamera;
   note: string;

@@ -1,4 +1,5 @@
 export type TourStato =
+  | "Bozza"
   | "In vendita"
   | "Completo"
   | "In corso"

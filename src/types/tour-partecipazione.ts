@@ -1,6 +1,8 @@
 import type { ClienteStato } from "@/types/cliente";
 import type { TourStato } from "@/types/tour";
 
+export type StatoIscrizione = "Iscritto" | "Lista attesa" | "Annullato";
+
 export type RuoloPartecipante =
   | "Partecipante"
   | "Tour Leader"
@@ -25,6 +27,7 @@ export type PartecipazioneTour = {
   id: string;
   tourId: string;
   clienteId: string;
+  statoIscrizione: StatoIscrizione;
   ruolo: RuoloPartecipante;
   pagamento: PagamentoPartecipante;
   documenti: DocumentiPartecipante;
@@ -37,6 +40,7 @@ export type PartecipazioneTour = {
 export type CreatePartecipazioneTourInput = {
   tourId: string;
   clienteId: string;
+  statoIscrizione?: StatoIscrizione;
   ruolo: RuoloPartecipante;
   pagamento: PagamentoPartecipante;
   documenti: DocumentiPartecipante;

@@ -63,6 +63,7 @@ export function createPartecipazioneTour(
     id: createPartecipazioneId(),
     tourId: input.tourId,
     clienteId: input.clienteId,
+    statoIscrizione: input.statoIscrizione ?? "Iscritto",
     ruolo: input.ruolo,
     pagamento: input.pagamento,
     documenti: input.documenti,

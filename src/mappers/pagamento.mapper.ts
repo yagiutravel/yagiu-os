@@ -3,6 +3,8 @@ import {
   calcolaStatoPagamento,
   parsePrezzoTour,
 } from "@/models/pagamento";
+import { mapTourPaymentRowToPagamento } from "@/mappers/tour-payment.mapper";
+import type { TourPaymentRow } from "@/types/database";
 import type { PartecipazioneTourView } from "@/types/tour-partecipazione";
 import type {
   Pagamento,
@@ -106,27 +108,7 @@ export function mapTourPagamentiData(
   };
 }
 
-/** Mapper Supabase — pronto per integrazione futura. */
-export function mapPagamentoRowToPagamento(row: {
-  id: string;
-  tour_id: string;
-  partecipazione_id: string;
-  importo: number;
-  data: string;
-  metodo: Pagamento["metodo"];
-  tipo: Pagamento["tipo"];
-  creato_il: string;
-  aggiornato_il: string;
-}): Pagamento {
-  return {
-    id: row.id,
-    tourId: row.tour_id,
-    partecipazioneId: row.partecipazione_id,
-    importo: row.importo,
-    data: row.data,
-    metodo: row.metodo,
-    tipo: row.tipo,
-    creatoIl: row.creato_il,
-    aggiornatoIl: row.aggiornato_il,
-  };
+/** Mapper Supabase tour_payments. */
+export function mapPagamentoRowToPagamento(row: TourPaymentRow): Pagamento {
+  return mapTourPaymentRowToPagamento(row);
 }

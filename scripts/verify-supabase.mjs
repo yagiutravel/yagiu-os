@@ -1,11 +1,26 @@
 /**
- * Verifica la connessione a Supabase.
+ * Verifica la connessione a Supabase e le tabelle Sprint 1A.
  * Usage: npm run supabase:verify
  */
 import { createClient } from "@supabase/supabase-js";
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+const SPRINT_1A_TABLES = [
+  "organizations",
+  "tours",
+  "tour_staff",
+  "tour_hotels",
+  "tour_rooms",
+  "room_assignments",
+  "tour_participants",
+  "tour_payments",
+  "tour_checklist_templates",
+  "tour_checklist_completions",
+  "tour_documents",
+  "tour_timeline_events",
+];
 
 async function verifySupabaseConnection() {
   if (!url || !anonKey) {
@@ -26,28 +41,53 @@ async function verifySupabaseConnection() {
     process.exit(1);
   }
 
-  const { error: tableError } = await supabase
+  const { error: clientiError } = await supabase
     .from("clienti")
     .select("id")
     .limit(1);
 
-  if (!tableError) {
-    console.log("✅ Connessione OK — tabella clienti trovata e accessibile.");
+  if (clientiError) {
+    if (
+      clientiError.code === "PGRST205" ||
+      clientiError.message.includes("Could not find the table")
+    ) {
+      console.log("⚠️  Tabella clienti non trovata — esegui supabase/schema.sql");
+    } else {
+      console.error("❌ Errore query clienti:", clientiError.message);
+      process.exit(1);
+    }
+  } else {
+    console.log("✅ Tabella clienti accessibile.");
+  }
+
+  let missing = 0;
+  for (const table of SPRINT_1A_TABLES) {
+    const { error } = await supabase.from(table).select("id").limit(1);
+    if (error) {
+      if (
+        error.code === "PGRST205" ||
+        error.message.includes("Could not find the table")
+      ) {
+        console.log(`⚠️  Tabella ${table} non trovata`);
+        missing += 1;
+      } else {
+        console.error(`❌ Errore su ${table}:`, error.message);
+        process.exit(1);
+      }
+    } else {
+      console.log(`✅ Tabella ${table} accessibile.`);
+    }
+  }
+
+  if (missing > 0) {
+    console.log(
+      "Esegui le migration in supabase/migrations/ dalla SQL Editor.",
+    );
     process.exit(0);
   }
 
-  if (
-    tableError.code === "PGRST205" ||
-    tableError.message.includes("Could not find the table")
-  ) {
-    console.log("✅ Connessione OK — tabella clienti non ancora creata.");
-    console.log("   Esegui supabase/schema.sql dalla SQL Editor di Supabase.");
-    process.exit(0);
-  }
-
-  console.error("❌ Errore query clienti:", tableError.message);
-  if (tableError.code) console.error(`   Codice: ${tableError.code}`);
-  process.exit(1);
+  console.log("✅ Sprint 1A — tutte le tabelle tour sono accessibili.");
+  process.exit(0);
 }
 
 verifySupabaseConnection();
