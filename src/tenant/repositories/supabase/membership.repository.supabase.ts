@@ -1,5 +1,5 @@
 import { getSupabaseClient } from "@/config/supabase";
-import { ROLE_BY_KEY } from "@/tenant/constants/roles.catalog";
+import { roleRepository } from "./role.repository.supabase";
 import type { IMembershipRepository } from "@/tenant/interfaces";
 import type {
   CreateMembershipInput,
@@ -23,8 +23,8 @@ type MembershipRow = {
   updated_at: string;
 };
 
-function mapRow(row: MembershipRow): Membership {
-  const role = ROLE_BY_KEY.get(row.role_key);
+async function mapRow(row: MembershipRow): Promise<Membership> {
+  const role = await roleRepository.findByKey(row.role_key);
   return {
     id: row.id,
     userId: row.user_id,
@@ -36,6 +36,13 @@ function mapRow(row: MembershipRow): Membership {
     joinedAt: row.joined_at,
     updatedAt: row.updated_at,
   };
+}
+
+async function resolveRoleKey(roleId: string): Promise<string> {
+  const role =
+    (await roleRepository.findById(roleId)) ??
+    (await roleRepository.findByKey(roleId));
+  return role?.key ?? roleId;
 }
 
 export class SupabaseMembershipRepository implements IMembershipRepository {
@@ -57,7 +64,7 @@ export class SupabaseMembershipRepository implements IMembershipRepository {
       .select("*")
       .eq("organization_id", organizationId);
     if (error) throw new Error(error.message);
-    return (data ?? []).map((row) => mapRow(row as MembershipRow));
+    return Promise.all((data ?? []).map((row) => mapRow(row as MembershipRow)));
   }
 
   async listByWorkspace(workspaceId: WorkspaceId): Promise<Membership[]> {
@@ -67,7 +74,7 @@ export class SupabaseMembershipRepository implements IMembershipRepository {
       .select("*")
       .eq("workspace_id", workspaceId);
     if (error) throw new Error(error.message);
-    return (data ?? []).map((row) => mapRow(row as MembershipRow));
+    return Promise.all((data ?? []).map((row) => mapRow(row as MembershipRow)));
   }
 
   async findByUserAndOrganization(
@@ -109,13 +116,11 @@ export class SupabaseMembershipRepository implements IMembershipRepository {
       .select("*")
       .eq("user_id", userId);
     if (error) throw new Error(error.message);
-    return (data ?? []).map((row) => mapRow(row as MembershipRow));
+    return Promise.all((data ?? []).map((row) => mapRow(row as MembershipRow)));
   }
 
   async create(input: CreateMembershipInput): Promise<Membership> {
-    const { ROLE_BY_ID } = await import("@/tenant/constants/roles.catalog");
-    const role = ROLE_BY_ID.get(input.roleId);
-    const roleKey = role?.key ?? input.roleId;
+    const roleKey = await resolveRoleKey(input.roleId);
 
     const supabase = getSupabaseClient();
     const { data, error } = await supabase
@@ -142,9 +147,7 @@ export class SupabaseMembershipRepository implements IMembershipRepository {
     } = {};
     if (input.status) payload.status = input.status;
     if (input.roleId) {
-      const { ROLE_BY_ID } = await import("@/tenant/constants/roles.catalog");
-      const role = ROLE_BY_ID.get(input.roleId);
-      if (role) payload.role_key = role.key;
+      payload.role_key = await resolveRoleKey(input.roleId);
     }
 
     const supabase = getSupabaseClient();

@@ -4,9 +4,11 @@ import {
 } from "@/models/schedulazione";
 import type {
   Schedulazione,
-  SchedulazioneRow,
+  SchedulazioneStato,
+  SchedulazioneTipo,
   SchedulazioneView,
 } from "@/types/schedulazione";
+import type { SchedulazioneRow } from "@/types/database";
 
 export function mapSchedulazioneToView(
   item: Schedulazione,
@@ -26,6 +28,9 @@ export function mapSchedulazioniToViews(
 export function mapSchedulazioneRowToSchedulazione(
   row: SchedulazioneRow,
 ): Schedulazione {
+  const ora =
+    row.ora.length > 5 ? row.ora.slice(0, 5) : row.ora;
+
   return {
     id: row.id,
     titolo: row.titolo,
@@ -33,10 +38,10 @@ export function mapSchedulazioneRowToSchedulazione(
     clienteNome: row.cliente_nome,
     tourId: row.tour_id,
     tourNome: row.tour_nome,
-    tipo: row.tipo,
+    tipo: row.tipo as SchedulazioneTipo,
     data: row.data,
-    ora: row.ora,
-    stato: row.stato,
+    ora,
+    stato: row.stato as SchedulazioneStato,
     creatoIl: row.creato_il,
     aggiornatoIl: row.aggiornato_il,
   };

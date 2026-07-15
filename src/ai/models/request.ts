@@ -12,13 +12,14 @@ export type AiRequest = {
 
 export type AiOrchestrationStatus = "planned" | "executed" | "failed";
 
-/** Risultato dell'orchestrazione — nessuna risposta LLM in questa fase. */
+/** Risultato dell'orchestrazione con risposta LLM quando disponibile. */
 export type AiOrchestrationResult = {
   request: AiRequest;
   selectedTool: string;
   toolResult: AiToolResult;
   context: AiContext;
   prompt: AiPrompt;
+  response?: string;
   status: AiOrchestrationStatus;
   processedAt: string;
 };

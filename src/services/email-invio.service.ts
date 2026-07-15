@@ -1,7 +1,6 @@
-import { insertEmailInvioMock } from "@/mock/email-invio";
-import { insertComunicazioneEmailMock } from "@/mock/comunicazioni";
-import { insertClienteTimelineEmailMock } from "@/mock/cliente-timeline";
-import { buildAnteprimaMessaggio } from "@/models/email-invio";
+import { getSupabaseClient } from "@/config/supabase";
+import { mapEmailInvioRowToInvio } from "@/mappers/email-invio.mapper";
+import { recordClienteTimelineEvent } from "@/services/cliente-timeline-event.service";
 import type { EmailInvio, InviaEmailInput } from "@/types/email-invio";
 
 export class EmailInvioServiceError extends Error {
@@ -11,6 +10,17 @@ export class EmailInvioServiceError extends Error {
   }
 }
 
+const TABLE = "email_invii";
+
+function handleSupabaseError(
+  operation: string,
+  error: { message: string; code?: string },
+): never {
+  throw new EmailInvioServiceError(
+    `[${operation}] ${error.message}${error.code ? ` (${error.code})` : ""}`,
+  );
+}
+
 export type InviaEmailResult = {
   invio: EmailInvio;
 };
@@ -18,21 +28,34 @@ export type InviaEmailResult = {
 export async function inviaEmailSimulata(
   input: InviaEmailInput,
 ): Promise<InviaEmailResult> {
-  await new Promise((resolve) => setTimeout(resolve, 600));
+  const supabase = getSupabaseClient();
 
-  const invio = insertEmailInvioMock(input);
+  const { data, error } = await supabase
+    .from(TABLE)
+    .insert({
+      cliente_id: input.clienteId,
+      destinatario: input.destinatario.trim(),
+      oggetto: input.oggetto.trim(),
+      messaggio: input.messaggio.trim(),
+      template_id: input.templateId || null,
+      allegati: input.allegati,
+      utente: input.utente,
+    })
+    .select("*")
+    .single();
 
-  insertClienteTimelineEmailMock({
+  if (error) {
+    handleSupabaseError("inviaEmailSimulata", error);
+  }
+
+  const invio = mapEmailInvioRowToInvio(data);
+
+  await recordClienteTimelineEvent({
     clienteId: input.clienteId,
-    oggetto: `Email inviata: ${input.oggetto}`,
+    tipo: "email_inviata",
+    titolo: `Email inviata: ${input.oggetto}`,
     descrizione: `Inviata a ${input.destinatario}${input.allegati.length > 0 ? ` con ${input.allegati.length} allegat${input.allegati.length === 1 ? "o" : "i"}` : ""}.`,
     utente: input.utente,
-  });
-
-  insertComunicazioneEmailMock({
-    clienteId: input.clienteId,
-    oggetto: input.oggetto,
-    anteprima: buildAnteprimaMessaggio(input.messaggio),
   });
 
   return { invio };

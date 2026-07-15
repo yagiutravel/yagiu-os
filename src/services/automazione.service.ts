@@ -1,10 +1,12 @@
-import { mapAutomazioniToViews } from "@/mappers/automazione.mapper";
+import { getSupabaseClient } from "@/config/supabase";
+import { isDevMissingTableNoOp } from "@/lib/supabase/missing-table";
 import {
-  createAutomazioneMock,
-  listAutomazioniMock,
-} from "@/mock/automazioni";
+  mapAutomazioneRowToAutomazione,
+  mapAutomazioniToViews,
+} from "@/mappers/automazione.mapper";
 import { countByStato } from "@/models/automazione";
 import type {
+  Automazione,
   AutomazioneStato,
   AutomazioneView,
   CreateAutomazioneInput,
@@ -17,6 +19,39 @@ export class AutomazioneServiceError extends Error {
   }
 }
 
+const TABLE = "automazioni";
+
+function handleSupabaseError(
+  operation: string,
+  error: { message: string; code?: string },
+): never {
+  throw new AutomazioneServiceError(
+    `[${operation}] ${error.message}${error.code ? ` (${error.code})` : ""}`,
+  );
+}
+
+async function listAutomazioni(): Promise<Automazione[]> {
+  const supabase = getSupabaseClient();
+
+  const { data, error } = await supabase
+    .from(TABLE)
+    .select("*")
+    .order("ultima_esecuzione", { ascending: false, nullsFirst: false })
+    .order("creato_il", { ascending: false })
+    .limit(500);
+
+  if (error) {
+    if (
+      isDevMissingTableNoOp("automazione", TABLE, "listAutomazioni", error)
+    ) {
+      return [];
+    }
+    handleSupabaseError("listAutomazioni", error);
+  }
+
+  return (data ?? []).map((row) => mapAutomazioneRowToAutomazione(row));
+}
+
 export type AutomazioneRiepilogo = {
   attivi: number;
   inattivi: number;
@@ -25,11 +60,12 @@ export type AutomazioneRiepilogo = {
 };
 
 export async function getAutomazioni(): Promise<AutomazioneView[]> {
-  return mapAutomazioniToViews(listAutomazioniMock());
+  const items = await listAutomazioni();
+  return mapAutomazioniToViews(items);
 }
 
 export async function getAutomazioneRiepilogo(): Promise<AutomazioneRiepilogo> {
-  const items = listAutomazioniMock();
+  const items = await listAutomazioni();
   const counts = countByStato(items);
   return {
     attivi: counts.attivo,
@@ -42,8 +78,25 @@ export async function getAutomazioneRiepilogo(): Promise<AutomazioneRiepilogo> {
 export async function createAutomazione(
   input: CreateAutomazioneInput,
 ): Promise<AutomazioneView> {
-  const created = createAutomazioneMock(input);
-  return mapAutomazioniToViews([created])[0];
+  const supabase = getSupabaseClient();
+
+  const { data, error } = await supabase
+    .from(TABLE)
+    .insert({
+      nome: input.nome.trim(),
+      trigger: input.trigger,
+      azione: input.azione,
+      stato: input.stato,
+      ultima_esecuzione: null,
+    })
+    .select("*")
+    .single();
+
+  if (error) {
+    handleSupabaseError("createAutomazione", error);
+  }
+
+  return mapAutomazioniToViews([mapAutomazioneRowToAutomazione(data)])[0];
 }
 
 export function filterAutomazioni(

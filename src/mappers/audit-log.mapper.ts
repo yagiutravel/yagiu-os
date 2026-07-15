@@ -23,7 +23,7 @@ export function mapAuditLogEntriesToViews(
   return sortAuditLogEntries(entries).map(mapAuditLogEntryToView);
 }
 
-/** Mapper Supabase — pronto per integrazione futura. */
+/** Mapper Supabase audit_log → dominio UI. */
 export function mapAuditLogRowToEntry(row: AuditLogRow): AuditLogEntry {
   return {
     id: row.id,

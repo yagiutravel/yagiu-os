@@ -22,20 +22,6 @@ export const CLIENTE_TIMELINE_EVENTO_LABELS: Record<
   preventivo_convertito: "Iscrizione da preventivo",
 };
 
-export function createClienteTimelineEventoId(): string {
-  return `ctle-${crypto.randomUUID()}`;
-}
-
-export function createClienteTimelineEvento(
-  data: Omit<ClienteTimelineEvento, "id" | "creatoIl">,
-): ClienteTimelineEvento {
-  return {
-    id: createClienteTimelineEventoId(),
-    ...data,
-    creatoIl: data.data,
-  };
-}
-
 export function sortTimelineEventi(
   eventi: ClienteTimelineEvento[],
 ): ClienteTimelineEvento[] {

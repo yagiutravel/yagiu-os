@@ -25,7 +25,8 @@ import { ProfiloViaggiatoreTimeline } from "./ProfiloViaggiatoreTimeline";
 import { ProfiloViaggiatoreNoteStaff } from "./ProfiloViaggiatoreNoteStaff";
 import { ClienteSchedaDocumenti } from "./ClienteSchedaDocumenti";
 import { ClienteSchedaQuestionario } from "./ClienteSchedaQuestionario";
-import { ClienteSchedaSectionPlaceholder } from "./ClienteSchedaSectionPlaceholder";
+import { ClienteSchedaViaggi } from "./ClienteSchedaViaggi";
+import { ClienteSchedaPagamenti } from "./ClienteSchedaPagamenti";
 import { getErrorMessage } from "@/shared/utils/error";
 
 
@@ -82,10 +83,6 @@ export function ClienteSchedaView() {
   const handleIndietro = useCallback(() => {
     router.push("/clienti");
   }, [router]);
-
-  const sezioneCorrente =
-    CLIENTE_SCHEDA_SEZIONI.find((sezione) => sezione.id === sezioneAttiva) ??
-    CLIENTE_SCHEDA_SEZIONI[0];
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
@@ -163,9 +160,11 @@ export function ClienteSchedaView() {
           <ClienteSchedaDocumenti clienteId={profilo.id} />
         ) : sezioneAttiva === "questionario" ? (
           <ClienteSchedaQuestionario clienteId={profilo.id} />
-        ) : (
-          <ClienteSchedaSectionPlaceholder sezione={sezioneCorrente} />
-        )}
+        ) : sezioneAttiva === "viaggi" ? (
+          <ClienteSchedaViaggi clienteId={profilo.id} />
+        ) : sezioneAttiva === "pagamenti" ? (
+          <ClienteSchedaPagamenti clienteId={profilo.id} />
+        ) : null}
         </div>
       </div>
 
@@ -181,7 +180,7 @@ export function ClienteSchedaView() {
             onClose={() => setEmailModalOpen(false)}
             onSent={() => {
               setTimelineRefreshKey((value) => value + 1);
-              showToast("Email inviata con successo (simulazione).", "success");
+              showToast("Email inviata con successo.", "success");
             }}
           />
           <ClienteInviaWhatsAppModal
@@ -198,7 +197,7 @@ export function ClienteSchedaView() {
             onClose={() => setWhatsappModalOpen(false)}
             onSent={() => {
               setTimelineRefreshKey((value) => value + 1);
-              showToast("WhatsApp inviato con successo (simulazione).", "success");
+              showToast("WhatsApp inviato con successo.", "success");
             }}
           />
         </>

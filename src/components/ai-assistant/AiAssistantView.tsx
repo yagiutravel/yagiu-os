@@ -188,7 +188,7 @@ export function AiAssistantView() {
               </h2>
               <p className="mt-1 max-w-md text-sm text-zinc-500">
                 Chiedi informazioni su clienti, tour, pagamenti, documenti o KPI
-                operativi. Le risposte usano i dati del gestionale in modalità mock.
+                operativi. Le risposte usano i dati reali del gestionale.
               </p>
             </div>
           ) : (

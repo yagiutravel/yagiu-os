@@ -1,7 +1,7 @@
 import {
   DOCUMENTO_TIPO_CONFIG,
 } from "@/lib/clienti/documenti-viaggiatore.config";
-import { formatDocumentoScadenza } from "@/lib/clienti/documenti-viaggiatore.data";
+import { formatDocumentoScadenza } from "@/models/documenti-viaggiatore";
 import { profiloIconBox, profiloItemCard, profiloSectionLabel } from "@/lib/clienti/profilo-ui";
 import type { DocumentoViaggiatore } from "@/types/documenti-viaggiatore";
 import { DocumentoStatoBadge } from "./DocumentoStatoBadge";

@@ -18,8 +18,4 @@ export {
   permissionEngine,
   roleEngine,
   tenantContextProvider,
-  getDefaultTenantContext,
-  DEFAULT_ORGANIZATION_ID,
-  DEFAULT_WORKSPACE_ID,
-  DEFAULT_USER_ID,
 } from "@/tenant";

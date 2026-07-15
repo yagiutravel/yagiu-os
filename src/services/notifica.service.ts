@@ -1,6 +1,7 @@
 import { getOrganizationId } from "@/config/organization";
 import { getAuthenticatedUserId } from "@/auth/session-store";
 import { getSupabaseClient } from "@/config/supabase";
+import { isDevMissingTableNoOp } from "@/lib/supabase/missing-table";
 import { mapNotificheToViews, mapNotificaRowToNotifica } from "@/mappers/notifica.mapper";
 import { countNotificheNonLette } from "@/models/notifica";
 import type {
@@ -37,10 +38,7 @@ async function fetchNotificheFromSupabase() {
   const { data, error } = await query;
 
   if (error) {
-    if (
-      error.code === "PGRST205" ||
-      error.message.includes("Could not find the table")
-    ) {
+    if (isDevMissingTableNoOp("notifica", TABLE, "fetchNotificheFromSupabase", error)) {
       return [];
     }
     throw new NotificaServiceError(error.message);

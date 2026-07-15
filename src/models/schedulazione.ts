@@ -1,5 +1,4 @@
 import type {
-  CreateSchedulazioneInput,
   Schedulazione,
   SchedulazioneForm,
   SchedulazioneFormErrors,
@@ -14,22 +13,6 @@ export const EMPTY_SCHEDULAZIONE_FORM: SchedulazioneForm = {
   ora: "09:00",
   stato: "programmata",
 };
-
-export function createSchedulazioneId(): string {
-  return `sched-${crypto.randomUUID()}`;
-}
-
-export function createSchedulazione(
-  input: CreateSchedulazioneInput,
-): Schedulazione {
-  const now = new Date().toISOString();
-  return {
-    id: createSchedulazioneId(),
-    ...input,
-    creatoIl: now,
-    aggiornatoIl: now,
-  };
-}
 
 export function formatSchedulazioneDataOra(data: string, ora: string): string {
   const combined = new Date(`${data}T${ora}`);

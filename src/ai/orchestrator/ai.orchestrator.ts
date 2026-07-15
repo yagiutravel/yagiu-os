@@ -4,6 +4,7 @@ import { memoryStore } from "../memory/memory.store";
 import type { AiOrchestrationResult, AiRequest } from "../models/request";
 import { toolPlanner } from "../planner/tool.planner";
 import { createToolRegistry, type ToolRegistry } from "../registry/tool.registry";
+import { completeAiPrompt } from "../services/ai-complete.server";
 import { createDefaultAiTools } from "../tools";
 
 export type AiOrchestratorOptions = {
@@ -32,12 +33,23 @@ export class AiOrchestrator {
     const context = contextBuilder.build({ request, toolResult });
     const prompt = promptBuilder.build({ request, context, toolResult });
 
+    let response: string | undefined;
+    if (toolResult.success) {
+      try {
+        const completion = await completeAiPrompt(prompt);
+        response = completion.content;
+      } catch {
+        response = undefined;
+      }
+    }
+
     const result: AiOrchestrationResult = {
       request,
       selectedTool,
       toolResult,
       context,
       prompt,
+      response,
       status: toolResult.success ? "executed" : "failed",
       processedAt: new Date().toISOString(),
     };

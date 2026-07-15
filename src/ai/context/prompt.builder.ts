@@ -1,3 +1,4 @@
+import { llmProvider } from "../providers/llm.provider";
 import type { BuildPromptInput } from "../models/prompt";
 import type { AiPrompt } from "../models/prompt";
 
@@ -6,8 +7,8 @@ Rispondi in italiano in modo professionale e conciso.
 Usa esclusivamente i dati forniti nel contesto.`;
 
 export const AI_PROVIDER_CONFIG = {
-  provider: "mock" as const,
-  model: "gpt-4o",
+  provider: "openai" as const,
+  model: llmProvider.config.model,
   maxTokens: 4096,
   temperature: 0.7,
 } as const;
@@ -16,7 +17,6 @@ function createPromptId(): string {
   return `prompt-${crypto.randomUUID()}`;
 }
 
-/** Assembla il prompt — nessun invio al provider in questa fase. */
 export class PromptBuilder {
   build(input: BuildPromptInput): AiPrompt {
     const { request, context, toolResult } = input;

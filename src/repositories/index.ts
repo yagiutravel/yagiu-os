@@ -99,5 +99,4 @@ export {
   permissionEngine,
   roleEngine,
   tenantContextProvider,
-  getDefaultTenantContext,
 } from "@/tenant";

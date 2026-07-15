@@ -1,11 +1,15 @@
 import {
   buildSearchIndex,
+  mapCompleanniDelMese,
   mapDashboardData,
   searchDashboardIndex,
 } from "@/mappers/dashboard.mapper";
 import { getAuthenticatedUserLabel } from "@/auth/session-store";
+import { getOrganizationId } from "@/config/organization";
+import { getSupabaseClient } from "@/config/supabase";
 import { getCamereByTourId } from "@/services/camera.service";
 import { getClienti } from "@/services/clienti.service";
+import { countLiberatorieMancanti } from "@/services/tour-checklist.service";
 import { countAssicurazioniDaEmettere } from "@/services/tour-insurance.service";
 import { listPreventivi } from "@/services/preventivo.service";
 import { getPartecipazioniByTourId } from "@/services/tour-partecipazione.service";
@@ -20,12 +24,33 @@ import type { PartecipazioneTourView } from "@/types/tour-partecipazione";
 
 let cachedSearchIndex: DashboardSearchIndex | null = null;
 
+async function loadCompleanniDelMese(now: Date) {
+  const supabase = getSupabaseClient();
+  const organizationId = await getOrganizationId();
+
+  const { data, error } = await supabase
+    .from("clienti")
+    .select("id, nome, data_nascita")
+    .eq("organization_id", organizationId)
+    .not("data_nascita", "is", null);
+
+  if (error) return [];
+
+  return mapCompleanniDelMese(
+    (data ?? []) as Array<{ id: string; nome: string; data_nascita: string }>,
+    now,
+  );
+}
+
 async function loadAggregationData() {
-  const [clienti, tours, assicurazioniMancanti, preventivi] = await Promise.all([
+  const now = new Date();
+  const [clienti, tours, assicurazioniMancanti, preventivi, compleanniDelMese] =
+    await Promise.all([
     getClienti(),
     getTours(),
     countAssicurazioniDaEmettere().catch(() => 0),
     listPreventivi().catch(() => []),
+    loadCompleanniDelMese(now),
   ]);
 
   const preventiviInAttesa = preventivi.filter((item) =>
@@ -54,12 +79,19 @@ async function loadAggregationData() {
     }),
   );
 
+  const liberatorieMancanti = await countLiberatorieMancanti(
+    activeTours.map((tour) => tour.id),
+    partecipazioniByTour,
+  ).catch(() => 0);
+
   return {
     clienti,
     tours,
     partecipazioniByTour,
     camereByTour,
     assicurazioniMancanti,
+    liberatorieMancanti,
+    compleanniDelMese,
     preventiviInAttesa,
     preventiviAccettati,
     preventiviValoreInAttesa,

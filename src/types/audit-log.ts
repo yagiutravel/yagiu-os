@@ -23,7 +23,7 @@ export type AuditLogAzioneTipo =
   | "inviato"
   | "completato";
 
-/** Record audit log — pronto per tabella Supabase `audit_log`. */
+/** Record audit log — tabella Supabase `audit_log`. */
 export type AuditLogEntry = {
   id: string;
   utente: string;
@@ -41,7 +41,7 @@ export type AuditLogView = AuditLogEntry & {
   oraFormattata: string;
 };
 
-/** Shape prevista per Supabase — non collegata ancora. */
+/** Row Supabase `audit_log`. */
 export type AuditLogRow = {
   id: string;
   utente: string;

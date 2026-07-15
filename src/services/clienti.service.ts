@@ -12,6 +12,7 @@ import type {
   UpdateClienteInput,
 } from "@/types/cliente";
 import type { ClienteRow } from "@/types/database";
+import { recordAuditLog } from "@/services/audit-log-record.service";
 
 export const CLIENTI_TABLE = "clienti";
 
@@ -66,7 +67,17 @@ export async function createCliente(input: CreateClienteInput): Promise<Cliente>
 
   if (error) handleSupabaseError("createCliente", error);
 
-  return mapRowToCliente(data as ClienteRow);
+  const cliente = mapRowToCliente(data as ClienteRow);
+
+  await recordAuditLog({
+    azione: `${cliente.nome} creato`,
+    tipo: "cliente",
+    azioneTipo: "creato",
+    entitaId: cliente.id,
+    entitaLabel: cliente.nome,
+  });
+
+  return cliente;
 }
 
 export async function updateCliente(
@@ -95,10 +106,22 @@ export async function updateCliente(
 
   if (error) handleSupabaseError("updateCliente", error);
 
-  return mapRowToCliente(data as ClienteRow);
+  const cliente = mapRowToCliente(data as ClienteRow);
+
+  await recordAuditLog({
+    azione: `${cliente.nome} modificato`,
+    tipo: "cliente",
+    azioneTipo: "modificato",
+    entitaId: cliente.id,
+    entitaLabel: cliente.nome,
+  });
+
+  return cliente;
 }
 
 export async function deleteCliente(id: string): Promise<void> {
+  const existing = await getCliente(id);
+
   const supabase = getSupabaseClient();
   const organizationId = await getOrganizationId();
 
@@ -109,4 +132,14 @@ export async function deleteCliente(id: string): Promise<void> {
     .eq("organization_id", organizationId);
 
   if (error) handleSupabaseError("deleteCliente", error);
+
+  if (existing) {
+    await recordAuditLog({
+      azione: `${existing.nome} eliminato`,
+      tipo: "cliente",
+      azioneTipo: "eliminato",
+      entitaId: id,
+      entitaLabel: existing.nome,
+    });
+  }
 }

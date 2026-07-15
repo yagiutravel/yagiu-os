@@ -5,6 +5,7 @@ import {
 } from "@/auth/session-store";
 import { getOrganizationId } from "@/config/organization";
 import { getSupabaseClient } from "@/config/supabase";
+import { isDevMissingTableNoOp } from "@/lib/supabase/missing-table";
 import type { RecordAuditLogInput } from "@/lib/audit/constants";
 import type { AuditLogRow } from "@/types/audit-log";
 
@@ -41,10 +42,7 @@ export async function recordAuditLog(input: RecordAuditLogInput): Promise<void> 
   });
 
   if (error) {
-    if (
-      error.code === "PGRST205" ||
-      error.message.includes("Could not find the table")
-    ) {
+    if (isDevMissingTableNoOp("audit-log-record", TABLE, "recordAuditLog", error)) {
       return;
     }
     handleSupabaseError("recordAuditLog", error);
@@ -63,10 +61,7 @@ export async function fetchAuditLogRows(limit = 200): Promise<AuditLogRow[]> {
     .limit(limit);
 
   if (error) {
-    if (
-      error.code === "PGRST205" ||
-      error.message.includes("Could not find the table")
-    ) {
+    if (isDevMissingTableNoOp("audit-log-record", TABLE, "fetchAuditLogRows", error)) {
       return [];
     }
     handleSupabaseError("fetchAuditLogRows", error);

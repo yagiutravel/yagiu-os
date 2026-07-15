@@ -13,6 +13,7 @@ import type { Session, User, AuthChangeEvent } from "@supabase/supabase-js";
 import { getSupabaseClient } from "@/config/supabase";
 import {
   buildTenantContext,
+  hydratePermissionCatalogFromDb,
   loadActiveMembership,
   loadUserProfile,
   recordAuthAuditEvent,
@@ -61,6 +62,8 @@ async function resolveAuthState(
     profile.organizationId,
     profile.workspaceId,
   );
+
+  await hydratePermissionCatalogFromDb();
 
   const tenantContext = buildTenantContext(profile, membership);
 

@@ -482,7 +482,8 @@ END $$;
 DO $$
 DECLARE
   child_tables TEXT[] := ARRAY[
-    'cliente_questionari', 'comunicazioni', 'cliente_timeline_eventi'
+    'cliente_questionari', 'comunicazioni', 'cliente_timeline_eventi',
+    'comunicazione_eventi'
   ];
   t TEXT;
 BEGIN
@@ -543,81 +544,6 @@ BEGIN
         )$pol$, t || '_delete_member', t);
     END IF;
   END LOOP;
-END $$;
-
--- comunicazione_eventi via comunicazioni -> clienti
-DO $$
-BEGIN
-  IF EXISTS (
-    SELECT 1 FROM information_schema.tables
-    WHERE table_schema = 'public' AND table_name = 'comunicazione_eventi'
-  ) THEN
-    DROP POLICY IF EXISTS "comunicazione_eventi_select_anon" ON public.comunicazione_eventi;
-    DROP POLICY IF EXISTS "comunicazione_eventi_insert_anon" ON public.comunicazione_eventi;
-    DROP POLICY IF EXISTS "comunicazione_eventi_update_anon" ON public.comunicazione_eventi;
-    DROP POLICY IF EXISTS "comunicazione_eventi_delete_anon" ON public.comunicazione_eventi;
-    DROP POLICY IF EXISTS "comunicazione_eventi_select_member" ON public.comunicazione_eventi;
-    DROP POLICY IF EXISTS "comunicazione_eventi_insert_member" ON public.comunicazione_eventi;
-    DROP POLICY IF EXISTS "comunicazione_eventi_update_member" ON public.comunicazione_eventi;
-    DROP POLICY IF EXISTS "comunicazione_eventi_delete_member" ON public.comunicazione_eventi;
-
-    CREATE POLICY "comunicazione_eventi_select_member" ON public.comunicazione_eventi
-      FOR SELECT TO authenticated
-      USING (
-        EXISTS (
-          SELECT 1
-          FROM public.comunicazioni com
-          JOIN public.clienti c ON c.id = com.cliente_id
-          WHERE com.id = comunicazione_id
-            AND public.is_org_member(c.organization_id)
-        )
-      );
-
-    CREATE POLICY "comunicazione_eventi_insert_member" ON public.comunicazione_eventi
-      FOR INSERT TO authenticated
-      WITH CHECK (
-        EXISTS (
-          SELECT 1
-          FROM public.comunicazioni com
-          JOIN public.clienti c ON c.id = com.cliente_id
-          WHERE com.id = comunicazione_id
-            AND public.is_org_member(c.organization_id)
-        )
-      );
-
-    CREATE POLICY "comunicazione_eventi_update_member" ON public.comunicazione_eventi
-      FOR UPDATE TO authenticated
-      USING (
-        EXISTS (
-          SELECT 1
-          FROM public.comunicazioni com
-          JOIN public.clienti c ON c.id = com.cliente_id
-          WHERE com.id = comunicazione_id
-            AND public.is_org_member(c.organization_id)
-        )
-      )
-      WITH CHECK (
-        EXISTS (
-          SELECT 1
-          FROM public.comunicazioni com
-          JOIN public.clienti c ON c.id = com.cliente_id
-          WHERE com.id = comunicazione_id
-            AND public.is_org_member(c.organization_id)
-        )
-      );
-
-    CREATE POLICY "comunicazione_eventi_delete_member" ON public.comunicazione_eventi
-      FOR DELETE TO authenticated
-      USING (
-        EXISTS (
-          SELECT 1
-          FROM public.comunicazioni com
-          JOIN public.clienti c ON c.id = com.cliente_id
-          WHERE com.id = comunicazione_id
-            AND public.is_org_member(c.organization_id)
-        )
-      );
-  END IF;
 END $$;
 
 -- Remaining legacy tables: authenticated-only (org via default org backfill later)

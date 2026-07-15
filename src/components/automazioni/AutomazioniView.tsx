@@ -7,7 +7,8 @@ import { Card, CardContent, CardHeader } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Spinner } from "@/components/ui/Spinner";
 import { useToast } from "@/components/ui/Toast";
-import { profiloContentWrap } from "@/lib/clienti/profilo-ui";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { PageContent } from "@/shared/components/layout/PageContent";
 import {
   filterAutomazioni,
   getAutomazioneRiepilogo,
@@ -63,25 +64,20 @@ export function AutomazioniView() {
   );
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-6 lg:px-8">
-        <div className={`${profiloContentWrap} space-y-6`}>
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h2 className="text-base font-semibold text-zinc-900">
-                Workflow automatici
-              </h2>
-              <p className="mt-1 text-sm text-zinc-500">
-                Regole trigger → azione per automatizzare comunicazioni e
-                notifiche.
-              </p>
-            </div>
+    <>
+      <div className="flex min-h-0 flex-1 flex-col">
+        <PageHeader
+          title="Automazioni"
+          description="Workflow automatici con trigger e azioni configurabili."
+          action={
             <Button onClick={() => setModalOpen(true)}>
               <Plus className="h-4 w-4" />
               Nuova regola
             </Button>
-          </div>
+          }
+        />
 
+        <PageContent className="space-y-4">
           {riepilogo && (
             <AutomazioneRiepilogoCards
               riepilogo={riepilogo}
@@ -114,7 +110,7 @@ export function AutomazioniView() {
               />
 
               {loading ? (
-                <div className="flex items-center justify-center py-24">
+                <div className="flex items-center justify-center py-12">
                   <Spinner className="h-5 w-5" />
                 </div>
               ) : filtered.length === 0 ? (
@@ -142,7 +138,7 @@ export function AutomazioniView() {
               )}
             </CardContent>
           </Card>
-        </div>
+        </PageContent>
       </div>
 
       <AutomazioneModal
@@ -153,6 +149,6 @@ export function AutomazioniView() {
           showToast("Automazione creata.", "success");
         }}
       />
-    </div>
+    </>
   );
 }

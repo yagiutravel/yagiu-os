@@ -2,6 +2,7 @@ import {
   calcolaStatoDocumento,
   CLIENTE_DOCUMENTO_TIPI,
 } from "@/models/cliente-documento";
+import type { ClienteDocumentoRow } from "@/types/database";
 import type {
   ClienteDocumento,
   ClienteDocumentiData,
@@ -40,22 +41,14 @@ export function mapClienteDocumentiData(
   };
 }
 
-/** Mapper Supabase — pronto per integrazione futura. */
-export function mapClienteDocumentoRowToDocumento(row: {
-  id: string;
-  cliente_id: string;
-  tipo: ClienteDocumento["tipo"];
-  numero: string;
-  scadenza: string;
-  allegato_nome: string | null;
-  allegato_url: string | null;
-  creato_il: string;
-  aggiornato_il: string;
-}): ClienteDocumento {
+/** Mapper Supabase cliente_documenti. */
+export function mapClienteDocumentoRowToDocumento(
+  row: ClienteDocumentoRow,
+): ClienteDocumento {
   return {
     id: row.id,
     clienteId: row.cliente_id,
-    tipo: row.tipo,
+    tipo: row.tipo as ClienteDocumento["tipo"],
     numero: row.numero,
     scadenza: row.scadenza,
     allegatoNome: row.allegato_nome,

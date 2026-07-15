@@ -12,4 +12,3 @@ export * from "./context";
 export * from "./repositories";
 export * from "./services";
 export * from "./engines";
-export * from "./mock/tenant.seed";

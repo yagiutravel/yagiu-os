@@ -32,10 +32,6 @@ export const EMPTY_INVIA_WHATSAPP_FORM: InviaWhatsAppForm = {
   templateId: "",
 };
 
-export function createWhatsAppId(prefix: string): string {
-  return `${prefix}-${crypto.randomUUID()}`;
-}
-
 export function variabileToken(variabile: WhatsAppVariabile): string {
   return `{{${variabile}}}`;
 }

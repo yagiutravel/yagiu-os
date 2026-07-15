@@ -74,7 +74,7 @@ export function ProfiloViaggiatorePanoramica({
 
       <ProfiloViaggiatoreTourEffettuati clienteId={profilo.id} />
 
-      <ProfiloViaggiatorePreferenze />
+      <ProfiloViaggiatorePreferenze clienteId={profilo.id} />
 
       <ProfiloViaggiatoreDocumenti clienteId={profilo.id} />
     </div>

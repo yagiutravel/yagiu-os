@@ -31,36 +31,6 @@ export const COMUNICAZIONE_EVENTO_LABELS: Record<ComunicazioneEventoTipo, string
   bentornato: "Bentornato",
 };
 
-export function createComunicazioneId(): string {
-  return `comm-${crypto.randomUUID()}`;
-}
-
-export function createComunicazioneEventoId(): string {
-  return `cevt-${crypto.randomUUID()}`;
-}
-
-export function createComunicazione(
-  data: Omit<Comunicazione, "id" | "creatoIl" | "aggiornatoIl">,
-): Comunicazione {
-  const now = new Date().toISOString();
-
-  return {
-    id: createComunicazioneId(),
-    ...data,
-    creatoIl: now,
-    aggiornatoIl: now,
-  };
-}
-
-export function createComunicazioneEvento(
-  data: Omit<ComunicazioneEventoTimeline, "id">,
-): ComunicazioneEventoTimeline {
-  return {
-    id: createComunicazioneEventoId(),
-    ...data,
-  };
-}
-
 export function formatComunicazioneStatoLabel(stato: ComunicazioneStato): string {
   const labels: Record<ComunicazioneStato, string> = {
     in_coda: "In coda",

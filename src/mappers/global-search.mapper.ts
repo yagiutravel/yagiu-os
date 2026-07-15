@@ -3,16 +3,9 @@ import {
   GLOBAL_SEARCH_CATEGORIA_ORDER,
 } from "@/lib/global-search/constants";
 import { createSearchEntry, matchesSearchQuery } from "@/models/global-search";
-import { GLOBAL_SEARCH_STATIC_ENTRIES } from "@/mock/global-search-index";
-import { listEventiMock, seedClienteTimelineMock } from "@/mock/cliente-timeline";
-import {
-  listDocumentiMock,
-  seedClienteDocumentiMock,
-} from "@/mock/cliente-documenti";
-import {
-  listQuestionariMock,
-  seedClienteQuestionarioMock,
-} from "@/mock/cliente-questionari";
+import { listAllDocumenti } from "@/services/cliente-documento.service";
+import { listClienteTimelineEventi } from "@/services/cliente-timeline-event.service";
+import { listQuestionari } from "@/services/cliente-questionario.service";
 import { listAllPagamenti } from "@/services/pagamento.service";
 import { listPreventivi } from "@/services/preventivo.service";
 import { listAllTourDocumenti } from "@/services/tour-documento.service";
@@ -25,6 +18,9 @@ import type {
   GlobalSearchIndexEntry,
   GlobalSearchResponse,
 } from "@/types/global-search";
+import type { ClienteQuestionarioView } from "@/types/cliente-questionario";
+import type { ClienteDocumento } from "@/types/cliente-documento";
+import type { ClienteTimelineEvento } from "@/types/cliente-timeline";
 import type { Tour } from "@/types/tour";
 import type { Camera } from "@/types/camera";
 
@@ -52,14 +48,13 @@ function buildDynamicEntries(
     stato: string;
     totale: number;
   }>,
+  questionari: ClienteQuestionarioView[],
+  timelineEventi: ClienteTimelineEvento[],
+  documentiCliente: ClienteDocumento[],
 ): GlobalSearchIndexEntry[] {
   const entries: GlobalSearchIndexEntry[] = [];
 
   for (const cliente of clienti) {
-    seedClienteDocumentiMock(cliente.id);
-    seedClienteQuestionarioMock(cliente.id);
-    seedClienteTimelineMock(cliente.id, cliente.nome);
-
     entries.push(
       createSearchEntry(
         "clienti",
@@ -176,7 +171,7 @@ function buildDynamicEntries(
     );
   }
 
-  for (const documento of listDocumentiMock()) {
+  for (const documento of documentiCliente) {
     entries.push(
       createSearchEntry(
         "documenti",
@@ -189,7 +184,7 @@ function buildDynamicEntries(
     );
   }
 
-  for (const questionario of listQuestionariMock()) {
+  for (const questionario of questionari) {
     entries.push(
       createSearchEntry(
         "questionari",
@@ -206,7 +201,7 @@ function buildDynamicEntries(
     );
   }
 
-  for (const evento of listEventiMock()) {
+  for (const evento of timelineEventi) {
     entries.push(
       createSearchEntry(
         "timeline",
@@ -250,16 +245,31 @@ export async function buildGlobalSearchIndex(): Promise<GlobalSearchIndex> {
     stato: string;
     totale: number;
   }> = [];
+  let questionari: ClienteQuestionarioView[] = [];
+  let timelineEventi: ClienteTimelineEvento[] = [];
+  let documentiCliente: ClienteDocumento[] = [];
 
   try {
-    const [clientiData, toursData, camereData, pagamentiData, documentiData, preventiviData] =
-      await Promise.all([
+    const [
+      clientiData,
+      toursData,
+      camereData,
+      pagamentiData,
+      documentiData,
+      preventiviData,
+      questionariData,
+      timelineEventiData,
+      documentiClienteData,
+    ] = await Promise.all([
       getClienti(),
       getTours(),
       listAllRooms(),
       listAllPagamenti(),
       listAllTourDocumenti(),
       listPreventivi(),
+      listQuestionari(),
+      listClienteTimelineEventi(),
+      listAllDocumenti(),
     ]);
     clienti = clientiData.map((item) => ({
       id: item.id,
@@ -292,6 +302,9 @@ export async function buildGlobalSearchIndex(): Promise<GlobalSearchIndex> {
       stato: item.stato,
       totale: item.totale,
     }));
+    questionari = questionariData;
+    timelineEventi = timelineEventiData;
+    documentiCliente = documentiClienteData;
   } catch {
     clienti = [];
     tours = [];
@@ -299,12 +312,24 @@ export async function buildGlobalSearchIndex(): Promise<GlobalSearchIndex> {
     pagamenti = [];
     documentiTour = [];
     preventivi = [];
+    questionari = [];
+    timelineEventi = [];
+    documentiCliente = [];
   }
 
-  return dedupeEntries([
-    ...GLOBAL_SEARCH_STATIC_ENTRIES,
-    ...buildDynamicEntries(clienti, tours, camere, pagamenti, documentiTour, preventivi),
-  ]);
+  return dedupeEntries(
+    buildDynamicEntries(
+      clienti,
+      tours,
+      camere,
+      pagamenti,
+      documentiTour,
+      preventivi,
+      questionari,
+      timelineEventi,
+      documentiCliente,
+    ),
+  );
 }
 
 export function searchGlobalIndex(

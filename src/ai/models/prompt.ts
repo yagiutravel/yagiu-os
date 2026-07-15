@@ -2,7 +2,7 @@ import type { AiContext } from "./context";
 import type { AiRequest } from "./request";
 import type { AiToolResult } from "./tool";
 
-/** Prompt assemblato — pronto per provider LLM futuro, non inviato in questa fase. */
+/** Prompt assemblato per il provider LLM. */
 export type AiPrompt = {
   id: string;
   system: string;
@@ -13,7 +13,7 @@ export type AiPrompt = {
 };
 
 export type AiPromptMetadata = {
-  provider: "mock" | "openai";
+  provider: "openai";
   model: string;
   temperature: number;
   maxTokens: number;

@@ -1,4 +1,11 @@
 import { getSupabaseClient } from "@/config/supabase";
+import { isDevMissingTableNoOp } from "@/lib/supabase/missing-table";
+import { hydratePermissionCatalog } from "@/tenant/constants/permissions.catalog";
+import { hydrateRoleCatalog } from "@/tenant/constants/roles.catalog";
+import {
+  permissionRepository,
+  roleRepository,
+} from "@/tenant/repositories";
 import type {
   AuthAuditEventType,
   AuthMembership,
@@ -47,6 +54,15 @@ function mapMembershipRow(row: MembershipRow): AuthMembership {
     scope: row.scope,
     status: row.status,
   };
+}
+
+export async function hydratePermissionCatalogFromDb(): Promise<void> {
+  const [roles, permissions] = await Promise.all([
+    roleRepository.list(),
+    permissionRepository.list(),
+  ]);
+  hydrateRoleCatalog(roles);
+  hydratePermissionCatalog(permissions);
 }
 
 export async function loadUserProfile(userId: string): Promise<UserProfile | null> {
@@ -110,7 +126,17 @@ export async function recordAuthAuditEvent(input: {
     metadata: (input.metadata ?? {}) as Json,
   });
 
-  if (error && error.code !== "PGRST205") {
+  if (error) {
+    if (
+      isDevMissingTableNoOp(
+        "auth",
+        "auth_audit_events",
+        "recordAuthAuditEvent",
+        error,
+      )
+    ) {
+      return;
+    }
     console.error("auth audit event failed:", error.message);
   }
 }

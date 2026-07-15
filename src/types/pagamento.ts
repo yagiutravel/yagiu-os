@@ -1,3 +1,5 @@
+import type { TourStato } from "@/types/tour";
+
 export type MetodoPagamento = "Bonifico" | "Carta" | "Contanti";
 
 export type TipoPagamento = "Acconto" | "Saldo";
@@ -63,6 +65,27 @@ export type TourPagamentiRiepilogo = {
 export type TourPagamentiData = {
   partecipanti: PartecipantePagamentoView[];
   riepilogo: TourPagamentiRiepilogo;
+};
+
+export type ClienteTourPagamentoView = {
+  tourId: string;
+  nomeTour: string;
+  destinazione: string;
+  anno: number;
+  statoTour: TourStato;
+  partecipante: PartecipantePagamentoView;
+};
+
+export type ClientePagamentiRiepilogo = {
+  totaleVersato: number;
+  importoResiduo: number;
+  numeroPagamenti: number;
+  tourConSaldoAperto: number;
+};
+
+export type ClientePagamentiData = {
+  perTour: ClienteTourPagamentoView[];
+  riepilogo: ClientePagamentiRiepilogo;
 };
 
 /** Shape Supabase `tour_payments`. */

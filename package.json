@@ -13,7 +13,10 @@
     "test:tour-flow": "node --env-file=.env.local scripts/tour-flow-smoke.mjs",
     "test:preventivi-flow": "node --env-file=.env.local scripts/preventivi-flow-smoke.mjs",
     "test:auth-flow": "node --env-file=.env.local scripts/auth-flow-smoke.mjs",
-    "test": "npm run test:auth-flow && npm run test:tour-flow && npm run test:preventivi-flow"
+    "test:comunicazioni-flow": "node --env-file=.env.local scripts/comunicazioni-flow-smoke.mjs",
+    "test:questionario-flow": "node --env-file=.env.local scripts/questionario-flow-smoke.mjs",
+    "test:auth-permissions-flow": "node --env-file=.env.local scripts/auth-permissions-flow-smoke.mjs",
+    "test": "npm run test:auth-flow && npm run test:auth-permissions-flow && npm run test:tour-flow && npm run test:preventivi-flow && npm run test:comunicazioni-flow && npm run test:questionario-flow"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.3",

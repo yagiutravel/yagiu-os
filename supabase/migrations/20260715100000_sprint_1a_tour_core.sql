@@ -1,6 +1,6 @@
 -- Sprint 1A: Tour core (organizations, tours, staff, hotels, rooms, assignments, participants)
 -- Esegui dalla SQL Editor di Supabase o via CLI.
--- Prerequisito: tabella public.clienti (schema.sql) e funzione set_updated_at.
+-- Prerequisito: migration 20260715090000_sprint_0_legacy_schema.sql (tabella clienti, set_updated_at).
 
 -- ---------------------------------------------------------------------------
 -- Helper: set_updated_at (idempotente — già definita da schema.sql)

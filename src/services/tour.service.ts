@@ -9,6 +9,8 @@ import {
   pickTourLeaderName,
 } from "@/mappers/tour.mapper";
 import { invalidateDashboardCache } from "@/services/dashboard.service";
+import { recordAuditLog } from "@/services/audit-log-record.service";
+import { recordNotifica } from "@/services/notifica-record.service";
 import { invalidateGlobalSearchIndex } from "@/services/global-search.service";
 import { seedDefaultChecklistTemplates } from "@/services/tour-checklist.service";
 import { seedProgramDaysFromTour } from "@/services/tour-program.service";
@@ -20,6 +22,8 @@ import type {
   UpdateTourInput,
 } from "@/types/tour";
 import type { TourDettaglio } from "@/types/tour-scheda";
+import { DOMAIN_TOUR_DEPARTING_SOON_DAYS } from "@/domain/constants";
+import { calcolaGiorniMancanti } from "@/models/dashboard";
 
 export class TourServiceError extends Error {
   constructor(message: string) {
@@ -43,6 +47,34 @@ function handleSupabaseError(operation: string, error: { message: string; code?:
 function invalidateCaches(): void {
   invalidateDashboardCache();
   invalidateGlobalSearchIndex();
+}
+
+async function maybeRecordTourPartenzaNotifica(
+  tourId: string,
+  nomeTour: string,
+  dataPartenza: string,
+  stato: TourRow["stato"],
+  numeroPartecipanti?: number,
+): Promise<void> {
+  if (stato === "archiviato") return;
+
+  const giorni = calcolaGiorniMancanti(dataPartenza);
+  if (giorni > DOMAIN_TOUR_DEPARTING_SOON_DAYS) return;
+
+  const partecipantiSuffix =
+    numeroPartecipanti !== undefined
+      ? ` — ${numeroPartecipanti} partecipanti confermati`
+      : "";
+
+  await recordNotifica({
+    tipo: "tour_partenza",
+    titolo: "Tour in partenza",
+    messaggio:
+      giorni === 0
+        ? `${nomeTour} parte oggi${partecipantiSuffix}.`
+        : `${nomeTour} parte tra ${giorni} giorni${partecipantiSuffix}.`,
+    href: `/tour/${tourId}`,
+  });
 }
 
 function setToursCache(tours: Tour[]): void {
@@ -234,6 +266,20 @@ export async function createTour(input: CreateTourInput): Promise<Tour> {
     titolo: "Tour creato",
     descrizione: `Tour "${tourRow.nome}" pubblicato su Yagiu OS.`,
   });
+  await recordAuditLog({
+    azione: "Tour creato",
+    tipo: "tour",
+    azioneTipo: "creato",
+    entitaId: tourRow.id,
+    entitaLabel: tourRow.nome,
+  });
+  await maybeRecordTourPartenzaNotifica(
+    tourRow.id,
+    tourRow.nome,
+    tourRow.data_partenza,
+    tourRow.stato,
+    tour.numeroPartecipanti,
+  );
   invalidateCaches();
   await getTours();
   return tour;
@@ -304,6 +350,25 @@ export async function updateTour(
   }
 
   const [tour] = await mapTourRowsToTours([data as TourRow]);
+  await recordAuditLog({
+    azione: "Tour modificato",
+    tipo: "tour",
+    azioneTipo: "modificato",
+    entitaId: tour.id,
+    entitaLabel: tour.nomeTour,
+  });
+  if (
+    input.dataPartenza !== undefined &&
+    input.dataPartenza !== existing.data_partenza
+  ) {
+    await maybeRecordTourPartenzaNotifica(
+      tour.id,
+      tour.nomeTour,
+      tour.dataPartenza,
+      (data as TourRow).stato,
+      tour.numeroPartecipanti,
+    );
+  }
   invalidateCaches();
   await getTours();
   return tour;
@@ -317,6 +382,8 @@ export async function deleteTour(id: string): Promise<void> {
   const organizationId = await getOrganizationId();
   const supabase = getSupabaseClient();
 
+  const existing = await fetchTourRowById(id);
+
   const { error } = await supabase
     .from(TOURS_TABLE)
     .delete()
@@ -324,6 +391,16 @@ export async function deleteTour(id: string): Promise<void> {
     .eq("organization_id", organizationId);
 
   if (error) handleSupabaseError("deleteTour", error);
+
+  if (existing) {
+    await recordAuditLog({
+      azione: "Tour eliminato",
+      tipo: "tour",
+      azioneTipo: "eliminato",
+      entitaId: id,
+      entitaLabel: existing.nome,
+    });
+  }
 
   toursCache = toursCache.filter((tour) => tour.id !== id);
   invalidateCaches();

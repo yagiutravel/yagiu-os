@@ -6,10 +6,6 @@ import {
   IMPORTO_ACCONTO_MEDIO,
   IMPORTO_SALDO_MEDIO,
 } from "@/models/dashboard";
-import {
-  MOCK_COMPLEANNI_MESE,
-  MOCK_LIBERATORIE_MANCANTI,
-} from "@/mock/dashboard";
 import type { CameraView } from "@/types/camera";
 import type { Cliente } from "@/types/cliente";
 import type {
@@ -18,6 +14,7 @@ import type {
   DashboardCalendario,
   DashboardCalendarioEvento,
   DashboardCamere,
+  DashboardCompleanno,
   DashboardData,
   DashboardDocumenti,
   DashboardGreeting,
@@ -38,6 +35,8 @@ type DashboardAggregationInput = {
   partecipazioniByTour: Map<string, PartecipazioneTourView[]>;
   camereByTour: Map<string, CameraView[]>;
   assicurazioniMancanti?: number;
+  liberatorieMancanti?: number;
+  compleanniDelMese?: DashboardCompleanno[];
   preventiviInAttesa?: number;
   preventiviAccettati?: number;
   preventiviValoreInAttesa?: number;
@@ -60,6 +59,29 @@ function getAllPartecipazioni(
   partecipazioniByTour: Map<string, PartecipazioneTourView[]>,
 ): PartecipazioneTourView[] {
   return Array.from(partecipazioniByTour.values()).flat();
+}
+
+export function mapCompleanniDelMese(
+  clienti: Array<{ id: string; nome: string; data_nascita: string }>,
+  now = new Date(),
+): DashboardCompleanno[] {
+  const meseCorrente = now.getMonth();
+
+  return clienti
+    .map((cliente) => {
+      const nascita = new Date(`${cliente.data_nascita}T00:00:00`);
+      if (Number.isNaN(nascita.getTime()) || nascita.getMonth() !== meseCorrente) {
+        return null;
+      }
+
+      return {
+        clienteId: cliente.id,
+        nome: cliente.nome,
+        giorno: nascita.getDate(),
+      };
+    })
+    .filter((item): item is DashboardCompleanno => item !== null)
+    .sort((a, b) => a.giorno - b.giorno);
 }
 
 export function mapTourInPartenza(
@@ -107,6 +129,7 @@ export function mapPagamenti(
 export function mapDocumenti(
   partecipazioni: PartecipazioneTourView[],
   assicurazioniMancanti = 0,
+  liberatorieMancanti = 0,
 ): DashboardDocumenti {
   const questionariMancanti = partecipazioni.filter(
     (item) => item.questionario === "Da compilare",
@@ -119,7 +142,7 @@ export function mapDocumenti(
     passaportiMancanti,
     questionariMancanti,
     assicurazioniMancanti,
-    liberatorieMancanti: MOCK_LIBERATORIE_MANCANTI,
+    liberatorieMancanti,
   };
 }
 
@@ -170,6 +193,7 @@ export function mapViaggiatori(
   clienti: Cliente[],
   partecipazioniByTour: Map<string, PartecipazioneTourView[]>,
   tours: Tour[],
+  compleanniDelMese: DashboardCompleanno[] = [],
   now = new Date(),
 ): DashboardViaggiatori {
   const tourById = new Map(tours.map((tour) => [tour.id, tour]));
@@ -192,7 +216,7 @@ export function mapViaggiatori(
   return {
     nuoviClienti: clienti.filter((item) => isNuovoCliente(item, now)).length,
     ultimiIscritti,
-    compleanniDelMese: MOCK_COMPLEANNI_MESE,
+    compleanniDelMese,
     clientiInattivi: clienti.filter((item) => item.stato === "Inattivo").length,
   };
 }
@@ -482,12 +506,14 @@ export function mapDashboardData(input: DashboardAggregationInput): DashboardDat
   const documenti = mapDocumenti(
     allPartecipazioni,
     input.assicurazioniMancanti ?? 0,
+    input.liberatorieMancanti ?? 0,
   );
   const camere = mapCamere(camereByTour);
   const viaggiatori = mapViaggiatori(
     clienti,
     partecipazioniByTour,
     tours,
+    input.compleanniDelMese ?? [],
     now,
   );
   const kpi = mapKpi(clienti, tours, camereByTour);

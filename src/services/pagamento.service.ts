@@ -6,20 +6,35 @@ import {
   mapUpdatePagamentoInputToUpdate,
 } from "@/mappers/tour-payment.mapper";
 import {
+  mapClientePagamentiData,
   mapTourPagamentiData,
 } from "@/mappers/pagamento.mapper";
+import { mapParticipantRowToPartecipazione } from "@/mappers/tour-participant.mapper";
+import { recordAuditLog } from "@/services/audit-log-record.service";
+import { recordNotifica } from "@/services/notifica-record.service";
 import { recordTourTimelineEvent } from "@/services/tour-timeline.service";
 import { getPartecipazioniByTourId } from "@/services/tour-partecipazione.service";
-import { getActiveTours, getTour } from "@/services/tour.service";
-import type { TourPaymentRow } from "@/types/database";
+import { getActiveTours, getTour, getTours, warmTourCache } from "@/services/tour.service";
+import type { TourParticipantRow, TourPaymentRow } from "@/types/database";
 import type { TourStato } from "@/types/tour";
 import type {
+  ClientePagamentiData,
   CreatePagamentoInput,
   Pagamento,
   TourPagamentiData,
   TourPagamentiRiepilogo,
   UpdatePagamentoInput,
 } from "@/types/pagamento";
+
+const PARTICIPANTS_TABLE = "tour_participants";
+
+async function buildPagamentoAuditLabel(
+  tourId: string,
+  tipo: Pagamento["tipo"],
+): Promise<string> {
+  const tour = await getTour(tourId);
+  return tour ? `${tipo} ${tour.nomeTour}` : tipo;
+}
 
 export class PagamentoServiceError extends Error {
   constructor(message: string) {
@@ -101,17 +116,45 @@ export async function createPagamento(
   const organizationId = await getOrganizationId();
   const supabase = getSupabaseClient();
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from(TABLE)
-    .insert(mapCreatePagamentoInputToInsert(input, organizationId));
+    .insert(mapCreatePagamentoInputToInsert(input, organizationId))
+    .select("*")
+    .single();
 
   if (error) handleSupabaseError("createPagamento", error);
+
+  const pagamento = mapTourPaymentRowToPagamento(data as TourPaymentRow);
+  const entitaLabel = await buildPagamentoAuditLabel(input.tourId, pagamento.tipo);
 
   await recordTourTimelineEvent({
     tourId: input.tourId,
     tipo: "pagamento",
     titolo: `${input.tipo} registrato`,
     descrizione: `Pagamento di € ${input.importo} tramite ${input.metodo}.`,
+  });
+
+  await recordAuditLog({
+    azione: "Pagamento registrato",
+    tipo: "pagamento",
+    azioneTipo: "creato",
+    entitaId: pagamento.id,
+    entitaLabel,
+  });
+
+  const partecipazioni = await getPartecipazioniByTourId(input.tourId);
+  const partecipazione = partecipazioni.find(
+    (item) => item.id === input.partecipazioneId,
+  );
+  const tour = await getTour(input.tourId);
+  const versamento =
+    pagamento.tipo === "Acconto" ? "l'acconto" : "il saldo";
+
+  await recordNotifica({
+    tipo: "pagamento_ricevuto",
+    titolo: "Pagamento ricevuto",
+    messaggio: `${partecipazione?.clienteNome ?? "Cliente"} ha versato ${versamento} di € ${pagamento.importo.toLocaleString("it-IT")} per ${tour?.nomeTour ?? "Tour"}.`,
+    href: `/tour/${input.tourId}`,
   });
 
   return buildTourPagamentiData(input.tourId);
@@ -130,7 +173,7 @@ export async function updatePagamento(
 
   const { data: current, error: fetchError } = await supabase
     .from(TABLE)
-    .select("tour_id")
+    .select("*")
     .eq("id", id)
     .eq("organization_id", organizationId)
     .maybeSingle();
@@ -148,6 +191,18 @@ export async function updatePagamento(
 
   if (error) handleSupabaseError("updatePagamento", error);
 
+  const pagamento = mapTourPaymentRowToPagamento(current as TourPaymentRow);
+  const tipo = input.tipo ?? pagamento.tipo;
+  const entitaLabel = await buildPagamentoAuditLabel(current.tour_id as string, tipo);
+
+  await recordAuditLog({
+    azione: "Pagamento aggiornato",
+    tipo: "pagamento",
+    azioneTipo: "aggiornato",
+    entitaId: id,
+    entitaLabel,
+  });
+
   return buildTourPagamentiData(current.tour_id as string);
 }
 
@@ -157,7 +212,7 @@ export async function deletePagamento(id: string): Promise<TourPagamentiData> {
 
   const { data: current, error: fetchError } = await supabase
     .from(TABLE)
-    .select("tour_id")
+    .select("*")
     .eq("id", id)
     .eq("organization_id", organizationId)
     .maybeSingle();
@@ -167,6 +222,12 @@ export async function deletePagamento(id: string): Promise<TourPagamentiData> {
     throw new PagamentoServiceError("Pagamento non trovato.");
   }
 
+  const pagamento = mapTourPaymentRowToPagamento(current as TourPaymentRow);
+  const entitaLabel = await buildPagamentoAuditLabel(
+    current.tour_id as string,
+    pagamento.tipo,
+  );
+
   const { error } = await supabase
     .from(TABLE)
     .delete()
@@ -174,6 +235,14 @@ export async function deletePagamento(id: string): Promise<TourPagamentiData> {
     .eq("organization_id", organizationId);
 
   if (error) handleSupabaseError("deletePagamento", error);
+
+  await recordAuditLog({
+    azione: "Pagamento eliminato",
+    tipo: "pagamento",
+    azioneTipo: "eliminato",
+    entitaId: id,
+    entitaLabel,
+  });
 
   return buildTourPagamentiData(current.tour_id as string);
 }
@@ -203,6 +272,65 @@ export type PagamentoOverviewItem = {
   stato: TourStato;
   riepilogo: TourPagamentiRiepilogo;
 };
+
+const EMPTY_CLIENTE_PAGAMENTI: ClientePagamentiData = {
+  perTour: [],
+  riepilogo: {
+    totaleVersato: 0,
+    importoResiduo: 0,
+    numeroPagamenti: 0,
+    tourConSaldoAperto: 0,
+  },
+};
+
+export async function getPagamentiByClienteId(
+  clienteId: string,
+): Promise<ClientePagamentiData> {
+  const organizationId = await getOrganizationId();
+  const supabase = getSupabaseClient();
+
+  const { data: participantRows, error: participantError } = await supabase
+    .from(PARTICIPANTS_TABLE)
+    .select("*")
+    .eq("organization_id", organizationId)
+    .eq("cliente_id", clienteId)
+    .order("created_at", { ascending: false });
+
+  if (participantError) {
+    handleSupabaseError("getPagamentiByClienteIdParticipants", participantError);
+  }
+
+  const partecipazioni = ((participantRows ?? []) as TourParticipantRow[]).map(
+    mapParticipantRowToPartecipazione,
+  );
+
+  if (partecipazioni.length === 0) {
+    return EMPTY_CLIENTE_PAGAMENTI;
+  }
+
+  const participantIds = partecipazioni.map((item) => item.id);
+
+  const { data: paymentRows, error: paymentError } = await supabase
+    .from(TABLE)
+    .select("*")
+    .eq("organization_id", organizationId)
+    .in("participant_id", participantIds)
+    .order("data", { ascending: false });
+
+  if (paymentError) {
+    handleSupabaseError("getPagamentiByClienteIdPayments", paymentError);
+  }
+
+  const pagamenti = ((paymentRows ?? []) as TourPaymentRow[]).map(
+    mapTourPaymentRowToPagamento,
+  );
+
+  await warmTourCache();
+  const tours = await getTours();
+  const toursById = new Map(tours.map((tour) => [tour.id, tour]));
+
+  return mapClientePagamentiData(partecipazioni, pagamenti, toursById);
+}
 
 export async function getPagamentiOverview(): Promise<PagamentoOverviewItem[]> {
   const tours = await getActiveTours();

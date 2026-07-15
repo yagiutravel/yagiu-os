@@ -1,5 +1,6 @@
 import { getAuthenticatedUserLabel } from "@/auth/session-store";
 import { getSupabaseClient } from "@/config/supabase";
+import { isDevMissingTableNoOp } from "@/lib/supabase/missing-table";
 import { mapClienteTimelineEventoRowToEvento } from "@/mappers/cliente-timeline.mapper";
 import type { ClienteTimelineEventoTipo } from "@/types/cliente-timeline";
 
@@ -26,6 +27,28 @@ export type RecordClienteTimelineInput = {
   utente?: string;
 };
 
+function mapTimelineRow(row: {
+  id: string;
+  cliente_id: string;
+  tipo: string;
+  titolo: string;
+  descrizione: string;
+  data: string;
+  utente: string;
+  creato_il: string;
+}) {
+  return mapClienteTimelineEventoRowToEvento({
+    id: row.id,
+    cliente_id: row.cliente_id,
+    tipo: row.tipo as ClienteTimelineEventoTipo,
+    titolo: row.titolo,
+    descrizione: row.descrizione,
+    data: row.data,
+    utente: row.utente,
+    creato_il: row.creato_il,
+  });
+}
+
 export async function recordClienteTimelineEvent(
   input: RecordClienteTimelineInput,
 ): Promise<void> {
@@ -41,8 +64,12 @@ export async function recordClienteTimelineEvent(
 
   if (error) {
     if (
-      error.code === "PGRST205" ||
-      error.message.includes("Could not find the table")
+      isDevMissingTableNoOp(
+        "cliente-timeline",
+        TABLE,
+        "recordClienteTimelineEvent",
+        error,
+      )
     ) {
       return;
     }
@@ -61,24 +88,43 @@ export async function fetchClienteTimelineEventi(clienteId: string) {
 
   if (error) {
     if (
-      error.code === "PGRST205" ||
-      error.message.includes("Could not find the table")
+      isDevMissingTableNoOp(
+        "cliente-timeline",
+        TABLE,
+        "fetchClienteTimelineEventi",
+        error,
+      )
     ) {
       return [];
     }
     handleSupabaseError("fetchClienteTimelineEventi", error);
   }
 
-  return (data ?? []).map((row) =>
-    mapClienteTimelineEventoRowToEvento({
-      id: row.id,
-      cliente_id: row.cliente_id,
-      tipo: row.tipo as ClienteTimelineEventoTipo,
-      titolo: row.titolo,
-      descrizione: row.descrizione,
-      data: row.data,
-      utente: row.utente,
-      creato_il: row.creato_il,
-    }),
-  );
+  return (data ?? []).map((row) => mapTimelineRow(row));
+}
+
+export async function listClienteTimelineEventi() {
+  const supabase = getSupabaseClient();
+
+  const { data, error } = await supabase
+    .from(TABLE)
+    .select("*")
+    .order("data", { ascending: false })
+    .limit(500);
+
+  if (error) {
+    if (
+      isDevMissingTableNoOp(
+        "cliente-timeline",
+        TABLE,
+        "listClienteTimelineEventi",
+        error,
+      )
+    ) {
+      return [];
+    }
+    handleSupabaseError("listClienteTimelineEventi", error);
+  }
+
+  return (data ?? []).map((row) => mapTimelineRow(row));
 }

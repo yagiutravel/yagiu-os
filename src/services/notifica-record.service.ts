@@ -1,6 +1,7 @@
 import { getOrganizationId } from "@/config/organization";
 import { getAuthenticatedUserId } from "@/auth/session-store";
 import { getSupabaseClient } from "@/config/supabase";
+import { isDevMissingTableNoOp } from "@/lib/supabase/missing-table";
 import type { NotificaTipo } from "@/types/notifica";
 
 export class NotificaRecordError extends Error {
@@ -41,10 +42,7 @@ export async function recordNotifica(input: RecordNotificaInput): Promise<void> 
   });
 
   if (error) {
-    if (
-      error.code === "PGRST205" ||
-      error.message.includes("Could not find the table")
-    ) {
+    if (isDevMissingTableNoOp("notifica-record", TABLE, "recordNotifica", error)) {
       return;
     }
     handleSupabaseError("recordNotifica", error);

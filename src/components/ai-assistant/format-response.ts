@@ -6,6 +6,10 @@ import type { SearchPaymentsData } from "@/ai/tools/search-payments.tool";
 import type { SearchToursData } from "@/ai/tools/search-tours.tool";
 
 export function formatAiResponse(result: AiOrchestrationResult): string {
+  if (result.response?.trim()) {
+    return result.response.trim();
+  }
+
   if (!result.toolResult.success) {
     return "Non sono riuscito a elaborare la richiesta. Riprova con una domanda più specifica.";
   }

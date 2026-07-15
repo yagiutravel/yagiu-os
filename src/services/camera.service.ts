@@ -12,6 +12,7 @@ import {
   mapUpdateCameraInputToUpdate,
 } from "@/mappers/tour-room.mapper";
 import { getCapienzaFromTipologia } from "@/models/camera";
+import { recordAuditLog } from "@/services/audit-log-record.service";
 import { getHotelsByTourId } from "@/services/tour-hotel.service";
 import { getPartecipazioniByTourId } from "@/services/tour-partecipazione.service";
 import { recordTourTimelineEvent } from "@/services/tour-timeline.service";
@@ -229,6 +230,15 @@ export async function createCamera(
   });
 
   const camera = mapTourRoomRowToCamera(data as TourRoomRow);
+
+  await recordAuditLog({
+    azione: `Camera ${numero} creata`,
+    tipo: "camera",
+    azioneTipo: "creato",
+    entitaId: camera.id,
+    entitaLabel: `Camera ${numero}`,
+  });
+
   const partecipazioni = await getPartecipazioniByTourId(input.tourId);
 
   return mapCameraToView(camera, [], partecipazioni);
@@ -280,6 +290,14 @@ export async function updateCamera(
 
   if (error) handleSupabaseError("updateCamera", error);
 
+  await recordAuditLog({
+    azione: "Camera cambiata",
+    tipo: "camera",
+    azioneTipo: "cambiato",
+    entitaId: id,
+    entitaLabel: `Camera ${current.numero}`,
+  });
+
   return (await buildCameraViews(current.tourId)).find((item) => item.id === id)!;
 }
 
@@ -299,6 +317,14 @@ export async function deleteCamera(id: string): Promise<void> {
     .eq("organization_id", organizationId);
 
   if (error) handleSupabaseError("deleteCamera", error);
+
+  await recordAuditLog({
+    azione: "Camera eliminata",
+    tipo: "camera",
+    azioneTipo: "eliminato",
+    entitaId: id,
+    entitaLabel: `Camera ${current.numero}`,
+  });
 }
 
 async function countAssignmentsByRoomId(roomId: string): Promise<number> {

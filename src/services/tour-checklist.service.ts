@@ -247,3 +247,67 @@ export async function setChecklistCompletion(
 
   return getChecklistByTourId(input.tourId);
 }
+
+export async function countLiberatorieMancanti(
+  tourIds: string[],
+  partecipazioniByTour: Map<
+    string,
+    Array<{ id: string; statoIscrizione: string }>
+  >,
+): Promise<number> {
+  if (tourIds.length === 0) return 0;
+
+  const organizationId = await getOrganizationId();
+  const supabase = getSupabaseClient();
+
+  const { data: templates, error: templatesError } = await supabase
+    .from(TEMPLATES_TABLE)
+    .select("id, tour_id")
+    .eq("organization_id", organizationId)
+    .in("tour_id", tourIds)
+    .eq("codice", "contratto");
+
+  if (templatesError) handleSupabaseError("countLiberatorieTemplates", templatesError);
+
+  const templateByTourId = new Map(
+    (templates ?? []).map((row) => [row.tour_id as string, row.id as string]),
+  );
+
+  const { data: completions, error: completionsError } = await supabase
+    .from(COMPLETIONS_TABLE)
+    .select("tour_id, template_id, participant_id, completato")
+    .eq("organization_id", organizationId)
+    .in("tour_id", tourIds)
+    .eq("completato", true);
+
+  if (completionsError) {
+    handleSupabaseError("countLiberatorieCompletions", completionsError);
+  }
+
+  const completedKeys = new Set(
+    (completions ?? []).map(
+      (row) =>
+        `${row.tour_id as string}:${row.template_id as string}:${row.participant_id as string}`,
+    ),
+  );
+
+  let mancanti = 0;
+
+  for (const tourId of tourIds) {
+    const templateId = templateByTourId.get(tourId);
+    if (!templateId) continue;
+
+    const iscritti = (partecipazioniByTour.get(tourId) ?? []).filter(
+      (item) => item.statoIscrizione === "Iscritto",
+    );
+
+    for (const partecipazione of iscritti) {
+      const key = `${tourId}:${templateId}:${partecipazione.id}`;
+      if (!completedKeys.has(key)) {
+        mancanti += 1;
+      }
+    }
+  }
+
+  return mancanti;
+}

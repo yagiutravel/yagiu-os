@@ -2,7 +2,6 @@ import type {
   Automazione,
   AutomazioneForm,
   AutomazioneFormErrors,
-  CreateAutomazioneInput,
 } from "@/types/automazione";
 
 export const EMPTY_AUTOMAZIONE_FORM: AutomazioneForm = {
@@ -11,21 +10,6 @@ export const EMPTY_AUTOMAZIONE_FORM: AutomazioneForm = {
   azione: "",
   stato: "attivo",
 };
-
-export function createAutomazioneId(): string {
-  return `auto-${crypto.randomUUID()}`;
-}
-
-export function createAutomazione(input: CreateAutomazioneInput): Automazione {
-  const now = new Date().toISOString();
-  return {
-    id: createAutomazioneId(),
-    ...input,
-    ultimaEsecuzione: null,
-    creatoIl: now,
-    aggiornatoIl: now,
-  };
-}
 
 export function formatAutomazioneUltimaEsecuzione(
   value: string | null,

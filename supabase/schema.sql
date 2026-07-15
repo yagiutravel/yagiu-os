@@ -1,6 +1,6 @@
--- Yagiu OS — Schema Supabase
--- Esegui manualmente dalla SQL Editor di Supabase.
--- Non eseguire automaticamente da CI/CD senza revisione.
+-- Yagiu OS — Schema Supabase (riferimento)
+-- Le tabelle sono applicate da: supabase/migrations/20260715090000_sprint_0_legacy_schema.sql
+-- Non eseguire manualmente se le migration numerate sono già state applicate.
 
 -- ---------------------------------------------------------------------------
 -- Tabella clienti

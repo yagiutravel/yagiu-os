@@ -1,5 +1,4 @@
-import { getDocumentiViaggiatorePlaceholder } from "@/lib/clienti/documenti-viaggiatore.data";
-import { getPreferenzeViaggiatorePlaceholder } from "@/lib/clienti/preferenze-viaggiatore.data";
+import { EMPTY_PREFERENZE } from "@/models/preferenze-viaggiatore";
 import { mapClienteToClienteScheda } from "@/lib/clienti/scheda/mappers/scheda.mapper";
 import { EMPTY_DISPLAY } from "@/models/cliente-scheda/defaults";
 import type { Cliente } from "@/types/cliente";
@@ -74,8 +73,8 @@ export function mapClienteSchedaToProfiloViaggiatore(
         numeroViaggi > 0 ? String(numeroViaggi) : EMPTY_DISPLAY,
       clienteAbituale: false,
     },
-    preferenze: getPreferenzeViaggiatorePlaceholder(),
-    documenti: getDocumentiViaggiatorePlaceholder(scheda.id),
+    preferenze: EMPTY_PREFERENZE,
+    documenti: { documenti: [] },
   };
 }
 

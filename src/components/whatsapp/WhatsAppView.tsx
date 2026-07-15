@@ -2,11 +2,12 @@
 
 import { useCallback, useEffect, useMemo, useState, startTransition } from "react";
 import { MessageCircle, SearchX } from "lucide-react";
-import { Card, CardContent, CardHeader } from "@/components/ui/Card";
+import { Card, CardContent } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Spinner } from "@/components/ui/Spinner";
 import { useToast } from "@/components/ui/Toast";
-import { profiloContentWrap } from "@/lib/clienti/profilo-ui";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { PageContent } from "@/shared/components/layout/PageContent";
 import {
   filterWhatsAppConversazioni,
   getWhatsAppConversazioni,
@@ -62,32 +63,28 @@ export function WhatsAppView() {
   };
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-6 lg:px-8">
-        <div className={`${profiloContentWrap} space-y-6`}>
-          <Card>
-            <CardHeader
-              title="WhatsApp Center"
-              description="Conversazioni WhatsApp con i viaggiatori."
-              action={
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-600/15">
-                  <MessageCircle className="h-4 w-4" strokeWidth={1.75} />
-                </div>
-              }
-            />
-            <CardContent className="space-y-4">
-              <div className="relative max-w-md">
-                <input
-                  type="search"
-                  placeholder="Cerca per cliente, numero o messaggio..."
-                  value={search}
-                  onChange={(event) => setSearch(event.target.value)}
-                  className="h-9 w-full rounded-md border border-zinc-200 bg-white px-3 text-sm outline-none focus:border-zinc-400 focus:ring-2 focus:ring-zinc-100"
-                />
-              </div>
+    <>
+      <div className="flex min-h-0 flex-1 flex-col">
+        <PageHeader
+          title="WhatsApp"
+          description="Centro messaggi WhatsApp con i viaggiatori."
+        />
 
+        <PageContent className="space-y-4">
+          <div className="relative max-w-md">
+            <input
+              type="search"
+              placeholder="Cerca per cliente, numero o messaggio..."
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              className="h-9 w-full rounded-md border border-zinc-200 bg-white px-3 text-sm outline-none focus:border-zinc-400 focus:ring-2 focus:ring-zinc-100"
+            />
+          </div>
+
+          <Card>
+            <CardContent>
               {loading ? (
-                <div className="flex items-center justify-center py-24">
+                <div className="flex items-center justify-center py-12">
                   <Spinner className="h-5 w-5" />
                 </div>
               ) : filtered.length === 0 ? (
@@ -112,7 +109,7 @@ export function WhatsAppView() {
               )}
             </CardContent>
           </Card>
-        </div>
+        </PageContent>
       </div>
 
       {selected && (
@@ -127,10 +124,10 @@ export function WhatsAppView() {
           }}
           onSent={() => {
             setRefreshKey((value) => value + 1);
-            showToast("WhatsApp inviato con successo (simulazione).", "success");
+            showToast("WhatsApp inviato con successo.", "success");
           }}
         />
       )}
-    </div>
+    </>
   );
 }

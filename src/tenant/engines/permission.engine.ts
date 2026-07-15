@@ -76,7 +76,9 @@ export class PermissionEngine implements IPermissionEngine {
     for (const membership of memberships) {
       if (membership.status !== "active") continue;
 
-      const role = await this.roleRepo.findById(membership.roleId);
+      const role =
+        (await this.roleRepo.findById(membership.roleId)) ??
+        (await this.roleRepo.findByKey(membership.roleId));
       if (!role) continue;
 
       for (const permissionId of role.permissionIds) {

@@ -8,6 +8,23 @@ import { signInTestUser, signOutTestUser } from "./lib/test-auth.mjs";
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
+const SPRINT_0_LEGACY_TABLES = [
+  "clienti",
+  "cliente_questionari",
+  "comunicazioni",
+  "comunicazione_eventi",
+  "email_templates",
+  "cliente_timeline_eventi",
+  "audit_log",
+  "notifiche",
+  "email_invii",
+  "whatsapp_conversazioni",
+  "whatsapp_invii",
+  "whatsapp_templates",
+  "schedulazioni",
+  "automazioni",
+];
+
 const SPRINT_1A_TABLES = [
   "organizations",
   "tours",
@@ -40,6 +57,8 @@ const SPRINT_3_TABLES = [
   "auth_audit_events",
 ];
 
+const SPRINT_5_TABLES = ["permissions", "roles", "role_permissions"];
+
 function isMissingTable(error) {
   return (
     error?.code === "PGRST205" ||
@@ -70,12 +89,15 @@ async function verifySupabaseConnection() {
   let missingSprint3 = 0;
 
   for (const table of [
+    ...SPRINT_0_LEGACY_TABLES,
     ...SPRINT_1A_TABLES,
     ...SPRINT_1B_TABLES,
     ...SPRINT_2_TABLES,
     ...SPRINT_3_TABLES,
+    ...SPRINT_5_TABLES,
   ]) {
-    const { error } = await supabase.from(table).select("id").limit(1);
+    const selectColumn = table === "role_permissions" ? "role_id" : "id";
+    const { error } = await supabase.from(table).select(selectColumn).limit(1);
     if (error) {
       if (isMissingTable(error)) {
         console.log(`⚠️  Tabella ${table} non trovata nell'API`);
@@ -137,7 +159,7 @@ async function verifySupabaseConnection() {
   await signOutTestUser(supabase);
 
   console.log(
-    "✅ Sprint 1A + 1B + 2 + 3 — tutte le tabelle applicative sono accessibili.",
+    "✅ Sprint 0 + 1A + 1B + 2 + 3 + 5.2 — tutte le tabelle applicative sono accessibili.",
   );
   process.exit(0);
 }

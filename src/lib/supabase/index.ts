@@ -17,3 +17,8 @@ export function createSupabaseClient(): TypedSupabaseClient {
 }
 
 export type { TypedSupabaseClient } from "@/config/supabase";
+export {
+  isDevMissingTableNoOp,
+  isMissingTableError,
+  MissingSupabaseTableError,
+} from "@/lib/supabase/missing-table";

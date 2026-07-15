@@ -1,13 +1,15 @@
-import { mapSchedulazioniToViews } from "@/mappers/schedulazione.mapper";
+import { getSupabaseClient } from "@/config/supabase";
+import { isDevMissingTableNoOp } from "@/lib/supabase/missing-table";
 import {
-  createSchedulazioneMock,
-  listSchedulazioniMock,
-} from "@/mock/schedulazioni";
+  mapSchedulazioneRowToSchedulazione,
+  mapSchedulazioniToViews,
+} from "@/mappers/schedulazione.mapper";
 import { countByStato } from "@/models/schedulazione";
 import { getTours } from "@/services/tour.service";
 import { getClienti } from "@/services/clienti.service";
 import type {
   CreateSchedulazioneInput,
+  Schedulazione,
   SchedulazioneStato,
   SchedulazioneTipo,
   SchedulazioneView,
@@ -20,6 +22,39 @@ export class SchedulazioneServiceError extends Error {
   }
 }
 
+const TABLE = "schedulazioni";
+
+function handleSupabaseError(
+  operation: string,
+  error: { message: string; code?: string },
+): never {
+  throw new SchedulazioneServiceError(
+    `[${operation}] ${error.message}${error.code ? ` (${error.code})` : ""}`,
+  );
+}
+
+async function listSchedulazioni(): Promise<Schedulazione[]> {
+  const supabase = getSupabaseClient();
+
+  const { data, error } = await supabase
+    .from(TABLE)
+    .select("*")
+    .order("data", { ascending: false })
+    .order("ora", { ascending: false })
+    .limit(500);
+
+  if (error) {
+    if (
+      isDevMissingTableNoOp("schedulazione", TABLE, "listSchedulazioni", error)
+    ) {
+      return [];
+    }
+    handleSupabaseError("listSchedulazioni", error);
+  }
+
+  return (data ?? []).map((row) => mapSchedulazioneRowToSchedulazione(row));
+}
+
 export type SchedulazioneRiepilogo = {
   programmate: number;
   inviate: number;
@@ -29,11 +64,12 @@ export type SchedulazioneRiepilogo = {
 };
 
 export async function getSchedulazioni(): Promise<SchedulazioneView[]> {
-  return mapSchedulazioniToViews(listSchedulazioniMock());
+  const items = await listSchedulazioni();
+  return mapSchedulazioniToViews(items);
 }
 
 export async function getSchedulazioneRiepilogo(): Promise<SchedulazioneRiepilogo> {
-  const items = listSchedulazioniMock();
+  const items = await listSchedulazioni();
   const counts = countByStato(items);
   return {
     programmate: counts.programmata,
@@ -47,8 +83,29 @@ export async function getSchedulazioneRiepilogo(): Promise<SchedulazioneRiepilog
 export async function createSchedulazione(
   input: CreateSchedulazioneInput,
 ): Promise<SchedulazioneView> {
-  const created = createSchedulazioneMock(input);
-  return mapSchedulazioniToViews([created])[0];
+  const supabase = getSupabaseClient();
+
+  const { data, error } = await supabase
+    .from(TABLE)
+    .insert({
+      titolo: input.titolo.trim(),
+      cliente_id: input.clienteId,
+      cliente_nome: input.clienteNome,
+      tour_id: input.tourId,
+      tour_nome: input.tourNome,
+      tipo: input.tipo,
+      data: input.data,
+      ora: input.ora,
+      stato: input.stato,
+    })
+    .select("*")
+    .single();
+
+  if (error) {
+    handleSupabaseError("createSchedulazione", error);
+  }
+
+  return mapSchedulazioniToViews([mapSchedulazioneRowToSchedulazione(data)])[0];
 }
 
 export async function getSchedulazioneClienti(): Promise<
@@ -56,18 +113,10 @@ export async function getSchedulazioneClienti(): Promise<
 > {
   try {
     const clienti = await getClienti();
-    if (clienti.length > 0) {
-      return clienti.map((c) => ({ id: c.id, nome: c.nome }));
-    }
+    return clienti.map((c) => ({ id: c.id, nome: c.nome }));
   } catch {
-    /* fallback */
+    return [];
   }
-  return [
-    { id: "mock-c1", nome: "Marco Rossi" },
-    { id: "mock-c2", nome: "Laura Bianchi" },
-    { id: "mock-c3", nome: "Giulia Verdi" },
-    { id: "mock-c4", nome: "Andrea Neri" },
-  ];
 }
 
 export async function getSchedulazioneTours(): Promise<

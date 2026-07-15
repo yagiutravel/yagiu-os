@@ -8,9 +8,12 @@ import {
 } from "@/models/automazione";
 import type {
   Automazione,
-  AutomazioneRow,
+  AutomazioneAzione,
+  AutomazioneStato,
+  AutomazioneTrigger,
   AutomazioneView,
 } from "@/types/automazione";
+import type { AutomazioneRow } from "@/types/database";
 
 export function mapAutomazioneToView(item: Automazione): AutomazioneView {
   return {
@@ -35,9 +38,9 @@ export function mapAutomazioneRowToAutomazione(
   return {
     id: row.id,
     nome: row.nome,
-    trigger: row.trigger,
-    azione: row.azione,
-    stato: row.stato,
+    trigger: row.trigger as AutomazioneTrigger,
+    azione: row.azione as AutomazioneAzione,
+    stato: row.stato as AutomazioneStato,
     ultimaEsecuzione: row.ultima_esecuzione,
     creatoIl: row.creato_il,
     aggiornatoIl: row.aggiornato_il,

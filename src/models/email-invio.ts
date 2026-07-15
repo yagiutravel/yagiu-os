@@ -15,10 +15,6 @@ export const EMPTY_INVIA_EMAIL_FORM: InviaEmailForm = {
   allegati: [],
 };
 
-export function createEmailInvioId(): string {
-  return `einv-${crypto.randomUUID()}`;
-}
-
 export function htmlToPlainText(html: string): string {
   return html
     .replace(/<br\s*\/?>/gi, "\n")

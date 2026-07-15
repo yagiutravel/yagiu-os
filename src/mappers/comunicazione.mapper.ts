@@ -1,10 +1,17 @@
 import type {
   Comunicazione,
   ComunicazioneClienteTimeline,
+  ComunicazioneCanale,
   ComunicazioneEventoTimeline,
+  ComunicazioneEventoTipo,
+  ComunicazioneStato,
   ComunicazioneView,
   ComunicazioniDashboardData,
 } from "@/types/comunicazione";
+import type {
+  ComunicazioneEventoRow,
+  ComunicazioneRow,
+} from "@/types/database";
 import {
   buildClienteTimeline,
   buildStatoRiepilogo,
@@ -76,25 +83,15 @@ export function mapComunicazioniDashboardData(input: {
 }
 
 /** Mapper Supabase — pronto per integrazione futura. */
-export function mapComunicazioneRowToComunicazione(row: {
-  id: string;
-  cliente_id: string;
-  canale: Comunicazione["canale"];
-  tipo: Comunicazione["tipo"];
-  stato: Comunicazione["stato"];
-  oggetto: string;
-  anteprima: string;
-  programmata_il: string | null;
-  inviata_il: string | null;
-  creato_il: string;
-  aggiornato_il: string;
-}): Comunicazione {
+export function mapComunicazioneRowToComunicazione(
+  row: ComunicazioneRow,
+): Comunicazione {
   return {
     id: row.id,
     clienteId: row.cliente_id,
-    canale: row.canale,
-    tipo: row.tipo,
-    stato: row.stato,
+    canale: row.canale as ComunicazioneCanale,
+    tipo: row.tipo as ComunicazioneEventoTipo,
+    stato: row.stato as ComunicazioneStato,
     oggetto: row.oggetto,
     anteprima: row.anteprima,
     programmataIl: row.programmata_il,
@@ -104,19 +101,13 @@ export function mapComunicazioneRowToComunicazione(row: {
   };
 }
 
-export function mapComunicazioneEventoRowToEvento(row: {
-  id: string;
-  cliente_id: string;
-  tipo: ComunicazioneEventoTimeline["tipo"];
-  titolo: string;
-  descrizione: string;
-  completato: boolean;
-  data: string | null;
-}): ComunicazioneEventoTimeline {
+export function mapComunicazioneEventoRowToEvento(
+  row: ComunicazioneEventoRow,
+): ComunicazioneEventoTimeline {
   return {
     id: row.id,
     clienteId: row.cliente_id,
-    tipo: row.tipo,
+    tipo: row.tipo as ComunicazioneEventoTipo,
     titolo: row.titolo,
     descrizione: row.descrizione,
     completato: row.completato,

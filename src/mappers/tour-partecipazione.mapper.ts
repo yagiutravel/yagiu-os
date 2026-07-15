@@ -1,10 +1,17 @@
 import type { Cliente } from "@/types/cliente";
-import type { Tour } from "@/types/tour";
+import type { Tour, TourStato } from "@/types/tour";
 import type {
   PartecipazioneTour,
   PartecipazioneTourView,
   TourClienteView,
 } from "@/types/tour-partecipazione";
+
+const TOUR_STATI_ATTIVI: TourStato[] = [
+  "Bozza",
+  "In vendita",
+  "Completo",
+  "In corso",
+];
 
 const EMPTY_CLIENTE_DISPLAY = {
   clienteNome: "Cliente non trovato",
@@ -69,4 +76,22 @@ export function mapPartecipazioniToTourClienteViewsWithTours(
     .map((item) => mapPartecipazioneToTourClienteView(item, toursById))
     .filter((item): item is TourClienteView => item !== null)
     .sort((a, b) => b.anno - a.anno);
+}
+
+export function partitionTourClienteViews(views: TourClienteView[]): {
+  attivi: TourClienteView[];
+  storico: TourClienteView[];
+} {
+  const attivi: TourClienteView[] = [];
+  const storico: TourClienteView[] = [];
+
+  for (const view of views) {
+    if (TOUR_STATI_ATTIVI.includes(view.statoTour)) {
+      attivi.push(view);
+    } else {
+      storico.push(view);
+    }
+  }
+
+  return { attivi, storico };
 }

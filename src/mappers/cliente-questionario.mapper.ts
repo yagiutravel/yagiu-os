@@ -2,6 +2,7 @@ import type {
   ClienteQuestionario,
   ClienteQuestionarioView,
 } from "@/types/cliente-questionario";
+import type { ClienteQuestionarioRow } from "@/types/database";
 
 export function mapQuestionarioToView(
   questionario: ClienteQuestionario,
@@ -9,27 +10,9 @@ export function mapQuestionarioToView(
   return { ...questionario };
 }
 
-/** Mapper Supabase — pronto per integrazione futura. */
-export function mapClienteQuestionarioRowToQuestionario(row: {
-  id: string;
-  cliente_id: string;
-  allergie: string;
-  intolleranze: string;
-  farmaci: string;
-  contatto_emergenza: string;
-  numero_emergenza: string;
-  taglia_maglietta: string;
-  taglia_felpa: string;
-  camera_preferita: string;
-  compagno_richiesto: string;
-  note_alimentari: string;
-  vegetariano: boolean;
-  vegano: boolean;
-  celiaco: boolean;
-  fumatore: boolean;
-  creato_il: string;
-  aggiornato_il: string;
-}): ClienteQuestionario {
+export function mapClienteQuestionarioRowToQuestionario(
+  row: ClienteQuestionarioRow,
+): ClienteQuestionario {
   return {
     id: row.id,
     clienteId: row.cliente_id,

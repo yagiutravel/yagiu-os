@@ -1,5 +1,5 @@
 import { Avatar } from "@/components/ui/Avatar";
-import { formatNotaStaffData } from "@/lib/clienti/note-staff.data";
+import { formatNotaStaffData } from "@/models/note-staff";
 import { profiloItemCard } from "@/lib/clienti/profilo-ui";
 import type { NotaStaff } from "@/types/note-staff";
 

@@ -27,7 +27,7 @@ async function main() {
   }
 
   const supabase = createClient(url, anonKey);
-  await signInTestUser(supabase);
+  const session = await signInTestUser(supabase);
   ok("Sessione test autenticata");
 
   const { error: probeError } = await supabase.from("preventivi").select("id").limit(1);
@@ -141,6 +141,8 @@ async function main() {
   ok("Conversione preventivo → iscrizione verificata");
 
   const { error: auditError } = await supabase.from("audit_log").insert({
+    organization_id: organizationId,
+    user_id: session.user.id,
     utente: "Smoke Test",
     azione: "Preventivo smoke test",
     tipo: "preventivo",
@@ -170,6 +172,8 @@ async function main() {
   }
 
   const { error: notificaError } = await supabase.from("notifiche").insert({
+    organization_id: organizationId,
+    user_id: session.user.id,
     tipo: "preventivo_creato",
     titolo: `Preventivo ${preventivo.numero}`,
     messaggio: "Smoke test notifica",

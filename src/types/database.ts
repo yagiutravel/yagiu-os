@@ -229,6 +229,84 @@ export type Database = {
         };
         Relationships: [];
       };
+      permissions: {
+        Row: {
+          id: string;
+          key: string;
+          resource: string;
+          action: string;
+          description: string;
+          scope: string;
+        };
+        Insert: {
+          id: string;
+          key: string;
+          resource: string;
+          action: string;
+          description?: string;
+          scope: string;
+        };
+        Update: {
+          id?: string;
+          key?: string;
+          resource?: string;
+          action?: string;
+          description?: string;
+          scope?: string;
+        };
+        Relationships: [];
+      };
+      roles: {
+        Row: {
+          id: string;
+          key: string;
+          name: string;
+          description: string;
+          scope: string;
+          organization_id: string | null;
+          is_system: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id: string;
+          key: string;
+          name: string;
+          description?: string;
+          scope: string;
+          organization_id?: string | null;
+          is_system?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          key?: string;
+          name?: string;
+          description?: string;
+          scope?: string;
+          organization_id?: string | null;
+          is_system?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      role_permissions: {
+        Row: {
+          role_id: string;
+          permission_id: string;
+        };
+        Insert: {
+          role_id: string;
+          permission_id: string;
+        };
+        Update: {
+          role_id?: string;
+          permission_id?: string;
+        };
+        Relationships: [];
+      };
       organizations: {
         Row: {
           id: string;
@@ -1104,6 +1182,453 @@ export type Database = {
         };
         Relationships: [];
       };
+      cliente_questionari: {
+        Row: {
+          id: string;
+          cliente_id: string;
+          creato_il: string;
+          aggiornato_il: string;
+          allergie: string;
+          intolleranze: string;
+          farmaci: string;
+          contatto_emergenza: string;
+          numero_emergenza: string;
+          taglia_maglietta: string;
+          taglia_felpa: string;
+          camera_preferita: string;
+          compagno_richiesto: string;
+          note_alimentari: string;
+          vegetariano: boolean;
+          vegano: boolean;
+          celiaco: boolean;
+          fumatore: boolean;
+        };
+        Insert: {
+          id?: string;
+          cliente_id: string;
+          creato_il?: string;
+          aggiornato_il?: string;
+          allergie?: string;
+          intolleranze?: string;
+          farmaci?: string;
+          contatto_emergenza?: string;
+          numero_emergenza?: string;
+          taglia_maglietta?: string;
+          taglia_felpa?: string;
+          camera_preferita?: string;
+          compagno_richiesto?: string;
+          note_alimentari?: string;
+          vegetariano?: boolean;
+          vegano?: boolean;
+          celiaco?: boolean;
+          fumatore?: boolean;
+        };
+        Update: {
+          id?: string;
+          cliente_id?: string;
+          creato_il?: string;
+          aggiornato_il?: string;
+          allergie?: string;
+          intolleranze?: string;
+          farmaci?: string;
+          contatto_emergenza?: string;
+          numero_emergenza?: string;
+          taglia_maglietta?: string;
+          taglia_felpa?: string;
+          camera_preferita?: string;
+          compagno_richiesto?: string;
+          note_alimentari?: string;
+          vegetariano?: boolean;
+          vegano?: boolean;
+          celiaco?: boolean;
+          fumatore?: boolean;
+        };
+        Relationships: [];
+      };
+      cliente_documenti: {
+        Row: {
+          id: string;
+          cliente_id: string;
+          creato_il: string;
+          aggiornato_il: string;
+          tipo: string;
+          numero: string;
+          scadenza: string;
+          allegato_nome: string | null;
+          allegato_url: string | null;
+        };
+        Insert: {
+          id?: string;
+          cliente_id: string;
+          creato_il?: string;
+          aggiornato_il?: string;
+          tipo: string;
+          numero?: string;
+          scadenza: string;
+          allegato_nome?: string | null;
+          allegato_url?: string | null;
+        };
+        Update: {
+          id?: string;
+          cliente_id?: string;
+          creato_il?: string;
+          aggiornato_il?: string;
+          tipo?: string;
+          numero?: string;
+          scadenza?: string;
+          allegato_nome?: string | null;
+          allegato_url?: string | null;
+        };
+        Relationships: [];
+      };
+      cliente_note_staff: {
+        Row: {
+          id: string;
+          cliente_id: string;
+          creato_il: string;
+          autore: string;
+          data: string;
+          contenuto: string;
+        };
+        Insert: {
+          id?: string;
+          cliente_id: string;
+          creato_il?: string;
+          autore: string;
+          data: string;
+          contenuto: string;
+        };
+        Update: {
+          id?: string;
+          cliente_id?: string;
+          creato_il?: string;
+          autore?: string;
+          data?: string;
+          contenuto?: string;
+        };
+        Relationships: [];
+      };
+      comunicazioni: {
+        Row: {
+          id: string;
+          cliente_id: string;
+          creato_il: string;
+          aggiornato_il: string;
+          canale: string;
+          tipo: string;
+          stato: string;
+          oggetto: string;
+          anteprima: string;
+          programmata_il: string | null;
+          inviata_il: string | null;
+        };
+        Insert: {
+          id?: string;
+          cliente_id: string;
+          creato_il?: string;
+          aggiornato_il?: string;
+          canale: string;
+          tipo: string;
+          stato: string;
+          oggetto?: string;
+          anteprima?: string;
+          programmata_il?: string | null;
+          inviata_il?: string | null;
+        };
+        Update: {
+          id?: string;
+          cliente_id?: string;
+          creato_il?: string;
+          aggiornato_il?: string;
+          canale?: string;
+          tipo?: string;
+          stato?: string;
+          oggetto?: string;
+          anteprima?: string;
+          programmata_il?: string | null;
+          inviata_il?: string | null;
+        };
+        Relationships: [];
+      };
+      comunicazione_eventi: {
+        Row: {
+          id: string;
+          cliente_id: string;
+          creato_il: string;
+          aggiornato_il: string;
+          tipo: string;
+          titolo: string;
+          descrizione: string;
+          completato: boolean;
+          data: string | null;
+        };
+        Insert: {
+          id?: string;
+          cliente_id: string;
+          creato_il?: string;
+          aggiornato_il?: string;
+          tipo: string;
+          titolo?: string;
+          descrizione?: string;
+          completato?: boolean;
+          data?: string | null;
+        };
+        Update: {
+          id?: string;
+          cliente_id?: string;
+          creato_il?: string;
+          aggiornato_il?: string;
+          tipo?: string;
+          titolo?: string;
+          descrizione?: string;
+          completato?: boolean;
+          data?: string | null;
+        };
+        Relationships: [];
+      };
+      email_templates: {
+        Row: {
+          id: string;
+          organization_id: string;
+          creato_il: string;
+          aggiornato_il: string;
+          titolo: string;
+          oggetto: string;
+          corpo_html: string;
+          categoria: string;
+        };
+        Insert: {
+          id?: string;
+          organization_id?: string;
+          creato_il?: string;
+          aggiornato_il?: string;
+          titolo: string;
+          oggetto?: string;
+          corpo_html?: string;
+          categoria: string;
+        };
+        Update: {
+          id?: string;
+          organization_id?: string;
+          creato_il?: string;
+          aggiornato_il?: string;
+          titolo?: string;
+          oggetto?: string;
+          corpo_html?: string;
+          categoria?: string;
+        };
+        Relationships: [];
+      };
+      email_invii: {
+        Row: {
+          id: string;
+          creato_il: string;
+          cliente_id: string;
+          destinatario: string;
+          oggetto: string;
+          messaggio: string;
+          template_id: string | null;
+          allegati: string[];
+          utente: string;
+          inviata_il: string;
+        };
+        Insert: {
+          id?: string;
+          creato_il?: string;
+          cliente_id: string;
+          destinatario: string;
+          oggetto?: string;
+          messaggio?: string;
+          template_id?: string | null;
+          allegati?: string[];
+          utente?: string;
+          inviata_il?: string;
+        };
+        Update: {
+          id?: string;
+          creato_il?: string;
+          cliente_id?: string;
+          destinatario?: string;
+          oggetto?: string;
+          messaggio?: string;
+          template_id?: string | null;
+          allegati?: string[];
+          utente?: string;
+          inviata_il?: string;
+        };
+        Relationships: [];
+      };
+      whatsapp_conversazioni: {
+        Row: {
+          id: string;
+          aggiornato_il: string;
+          cliente_id: string;
+          numero: string;
+          ultimo_messaggio: string;
+          data: string;
+          stato: string;
+        };
+        Insert: {
+          id?: string;
+          aggiornato_il?: string;
+          cliente_id: string;
+          numero?: string;
+          ultimo_messaggio?: string;
+          data?: string;
+          stato?: string;
+        };
+        Update: {
+          id?: string;
+          aggiornato_il?: string;
+          cliente_id?: string;
+          numero?: string;
+          ultimo_messaggio?: string;
+          data?: string;
+          stato?: string;
+        };
+        Relationships: [];
+      };
+      whatsapp_invii: {
+        Row: {
+          id: string;
+          creato_il: string;
+          cliente_id: string;
+          numero: string;
+          messaggio: string;
+          template_id: string | null;
+          utente: string;
+          inviato_il: string;
+        };
+        Insert: {
+          id?: string;
+          creato_il?: string;
+          cliente_id: string;
+          numero: string;
+          messaggio?: string;
+          template_id?: string | null;
+          utente?: string;
+          inviato_il?: string;
+        };
+        Update: {
+          id?: string;
+          creato_il?: string;
+          cliente_id?: string;
+          numero?: string;
+          messaggio?: string;
+          template_id?: string | null;
+          utente?: string;
+          inviato_il?: string;
+        };
+        Relationships: [];
+      };
+      whatsapp_templates: {
+        Row: {
+          id: string;
+          organization_id: string;
+          creato_il: string;
+          aggiornato_il: string;
+          titolo: string;
+          messaggio: string;
+        };
+        Insert: {
+          id?: string;
+          organization_id?: string;
+          creato_il?: string;
+          aggiornato_il?: string;
+          titolo: string;
+          messaggio?: string;
+        };
+        Update: {
+          id?: string;
+          organization_id?: string;
+          creato_il?: string;
+          aggiornato_il?: string;
+          titolo?: string;
+          messaggio?: string;
+        };
+        Relationships: [];
+      };
+      schedulazioni: {
+        Row: {
+          id: string;
+          creato_il: string;
+          aggiornato_il: string;
+          titolo: string;
+          cliente_id: string;
+          cliente_nome: string;
+          tour_id: string | null;
+          tour_nome: string | null;
+          tipo: string;
+          data: string;
+          ora: string;
+          stato: string;
+        };
+        Insert: {
+          id?: string;
+          creato_il?: string;
+          aggiornato_il?: string;
+          titolo: string;
+          cliente_id: string;
+          cliente_nome?: string;
+          tour_id?: string | null;
+          tour_nome?: string | null;
+          tipo: string;
+          data: string;
+          ora: string;
+          stato: string;
+        };
+        Update: {
+          id?: string;
+          creato_il?: string;
+          aggiornato_il?: string;
+          titolo?: string;
+          cliente_id?: string;
+          cliente_nome?: string;
+          tour_id?: string | null;
+          tour_nome?: string | null;
+          tipo?: string;
+          data?: string;
+          ora?: string;
+          stato?: string;
+        };
+        Relationships: [];
+      };
+      automazioni: {
+        Row: {
+          id: string;
+          organization_id: string;
+          creato_il: string;
+          aggiornato_il: string;
+          nome: string;
+          trigger: string;
+          azione: string;
+          stato: string;
+          ultima_esecuzione: string | null;
+        };
+        Insert: {
+          id?: string;
+          organization_id?: string;
+          creato_il?: string;
+          aggiornato_il?: string;
+          nome: string;
+          trigger: string;
+          azione: string;
+          stato: string;
+          ultima_esecuzione?: string | null;
+        };
+        Update: {
+          id?: string;
+          organization_id?: string;
+          creato_il?: string;
+          aggiornato_il?: string;
+          nome?: string;
+          trigger?: string;
+          azione?: string;
+          stato?: string;
+          ultima_esecuzione?: string | null;
+        };
+        Relationships: [];
+      };
       cliente_timeline_eventi: {
         Row: {
           id: string;
@@ -1154,6 +1679,18 @@ export type Database = {
         Args: Record<string, never>;
         Returns: undefined;
       };
+      set_aggiornato_il: {
+        Args: Record<string, never>;
+        Returns: undefined;
+      };
+      is_org_member: {
+        Args: { p_org_id: string };
+        Returns: boolean;
+      };
+      user_organization_ids: {
+        Args: Record<string, never>;
+        Returns: string[];
+      };
     };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;
@@ -1163,7 +1700,66 @@ export type Database = {
 export type ClienteRow = Database["public"]["Tables"]["clienti"]["Row"];
 export type ClienteInsert = Database["public"]["Tables"]["clienti"]["Insert"];
 export type ClienteUpdate = Database["public"]["Tables"]["clienti"]["Update"];
-
+export type ClienteQuestionarioRow =
+  Database["public"]["Tables"]["cliente_questionari"]["Row"];
+export type ClienteQuestionarioInsert =
+  Database["public"]["Tables"]["cliente_questionari"]["Insert"];
+export type ClienteQuestionarioUpdate =
+  Database["public"]["Tables"]["cliente_questionari"]["Update"];
+export type ClienteDocumentoRow =
+  Database["public"]["Tables"]["cliente_documenti"]["Row"];
+export type ClienteDocumentoInsert =
+  Database["public"]["Tables"]["cliente_documenti"]["Insert"];
+export type ClienteDocumentoUpdate =
+  Database["public"]["Tables"]["cliente_documenti"]["Update"];
+export type ClienteNoteStaffRow =
+  Database["public"]["Tables"]["cliente_note_staff"]["Row"];
+export type ClienteNoteStaffInsert =
+  Database["public"]["Tables"]["cliente_note_staff"]["Insert"];
+export type ClienteNoteStaffUpdate =
+  Database["public"]["Tables"]["cliente_note_staff"]["Update"];
+export type ComunicazioneRow = Database["public"]["Tables"]["comunicazioni"]["Row"];
+export type ComunicazioneInsert =
+  Database["public"]["Tables"]["comunicazioni"]["Insert"];
+export type ComunicazioneUpdate =
+  Database["public"]["Tables"]["comunicazioni"]["Update"];
+export type ComunicazioneEventoRow =
+  Database["public"]["Tables"]["comunicazione_eventi"]["Row"];
+export type ComunicazioneEventoInsert =
+  Database["public"]["Tables"]["comunicazione_eventi"]["Insert"];
+export type ComunicazioneEventoUpdate =
+  Database["public"]["Tables"]["comunicazione_eventi"]["Update"];
+export type EmailTemplateRow = Database["public"]["Tables"]["email_templates"]["Row"];
+export type EmailTemplateInsert =
+  Database["public"]["Tables"]["email_templates"]["Insert"];
+export type EmailTemplateUpdate =
+  Database["public"]["Tables"]["email_templates"]["Update"];
+export type EmailInvioRow = Database["public"]["Tables"]["email_invii"]["Row"];
+export type EmailInvioInsert = Database["public"]["Tables"]["email_invii"]["Insert"];
+export type EmailInvioUpdate = Database["public"]["Tables"]["email_invii"]["Update"];
+export type WhatsAppConversazioneRow =
+  Database["public"]["Tables"]["whatsapp_conversazioni"]["Row"];
+export type WhatsAppConversazioneInsert =
+  Database["public"]["Tables"]["whatsapp_conversazioni"]["Insert"];
+export type WhatsAppConversazioneUpdate =
+  Database["public"]["Tables"]["whatsapp_conversazioni"]["Update"];
+export type WhatsAppInvioRow = Database["public"]["Tables"]["whatsapp_invii"]["Row"];
+export type WhatsAppInvioInsert = Database["public"]["Tables"]["whatsapp_invii"]["Insert"];
+export type WhatsAppInvioUpdate = Database["public"]["Tables"]["whatsapp_invii"]["Update"];
+export type WhatsAppTemplateRow =
+  Database["public"]["Tables"]["whatsapp_templates"]["Row"];
+export type WhatsAppTemplateInsert =
+  Database["public"]["Tables"]["whatsapp_templates"]["Insert"];
+export type WhatsAppTemplateUpdate =
+  Database["public"]["Tables"]["whatsapp_templates"]["Update"];
+export type SchedulazioneRow = Database["public"]["Tables"]["schedulazioni"]["Row"];
+export type SchedulazioneInsert =
+  Database["public"]["Tables"]["schedulazioni"]["Insert"];
+export type SchedulazioneUpdate =
+  Database["public"]["Tables"]["schedulazioni"]["Update"];
+export type AutomazioneRow = Database["public"]["Tables"]["automazioni"]["Row"];
+export type AutomazioneInsert = Database["public"]["Tables"]["automazioni"]["Insert"];
+export type AutomazioneUpdate = Database["public"]["Tables"]["automazioni"]["Update"];
 export type OrganizationRow = Database["public"]["Tables"]["organizations"]["Row"];
 export type TourRow = Database["public"]["Tables"]["tours"]["Row"];
 export type TourInsert = Database["public"]["Tables"]["tours"]["Insert"];
@@ -1245,3 +1841,49 @@ export type PreventivoRigaInsert =
   Database["public"]["Tables"]["preventivo_righe"]["Insert"];
 export type PreventivoRigaUpdate =
   Database["public"]["Tables"]["preventivo_righe"]["Update"];
+export type AuditLogRow = Database["public"]["Tables"]["audit_log"]["Row"];
+export type AuditLogInsert = Database["public"]["Tables"]["audit_log"]["Insert"];
+export type AuditLogUpdate = Database["public"]["Tables"]["audit_log"]["Update"];
+export type NotificaRow = Database["public"]["Tables"]["notifiche"]["Row"];
+export type NotificaInsert = Database["public"]["Tables"]["notifiche"]["Insert"];
+export type NotificaUpdate = Database["public"]["Tables"]["notifiche"]["Update"];
+export type ClienteTimelineEventoRow =
+  Database["public"]["Tables"]["cliente_timeline_eventi"]["Row"];
+export type ClienteTimelineEventoInsert =
+  Database["public"]["Tables"]["cliente_timeline_eventi"]["Insert"];
+export type ClienteTimelineEventoUpdate =
+  Database["public"]["Tables"]["cliente_timeline_eventi"]["Update"];
+export type WorkspaceRow = Database["public"]["Tables"]["workspaces"]["Row"];
+export type WorkspaceInsert = Database["public"]["Tables"]["workspaces"]["Insert"];
+export type WorkspaceUpdate = Database["public"]["Tables"]["workspaces"]["Update"];
+export type UserProfileRow = Database["public"]["Tables"]["user_profiles"]["Row"];
+export type UserProfileInsert = Database["public"]["Tables"]["user_profiles"]["Insert"];
+export type UserProfileUpdate = Database["public"]["Tables"]["user_profiles"]["Update"];
+export type MembershipRow = Database["public"]["Tables"]["memberships"]["Row"];
+export type MembershipInsert = Database["public"]["Tables"]["memberships"]["Insert"];
+export type MembershipUpdate = Database["public"]["Tables"]["memberships"]["Update"];
+export type AuthAuditEventRow =
+  Database["public"]["Tables"]["auth_audit_events"]["Row"];
+export type AuthAuditEventInsert =
+  Database["public"]["Tables"]["auth_audit_events"]["Insert"];
+export type AuthAuditEventUpdate =
+  Database["public"]["Tables"]["auth_audit_events"]["Update"];
+export type PermissionRow = Database["public"]["Tables"]["permissions"]["Row"];
+export type PermissionInsert = Database["public"]["Tables"]["permissions"]["Insert"];
+export type PermissionUpdate = Database["public"]["Tables"]["permissions"]["Update"];
+export type RoleRow = Database["public"]["Tables"]["roles"]["Row"];
+export type RoleInsert = Database["public"]["Tables"]["roles"]["Insert"];
+export type RoleUpdate = Database["public"]["Tables"]["roles"]["Update"];
+export type RolePermissionRow =
+  Database["public"]["Tables"]["role_permissions"]["Row"];
+export type RolePermissionInsert =
+  Database["public"]["Tables"]["role_permissions"]["Insert"];
+export type RolePermissionUpdate =
+  Database["public"]["Tables"]["role_permissions"]["Update"];
+export type OrganizationInsert = Database["public"]["Tables"]["organizations"]["Insert"];
+export type OrganizationUpdate = Database["public"]["Tables"]["organizations"]["Update"];
+export type TourStaffUpdate = Database["public"]["Tables"]["tour_staff"]["Update"];
+export type RoomAssignmentUpdate =
+  Database["public"]["Tables"]["room_assignments"]["Update"];
+export type TourTimelineEventUpdate =
+  Database["public"]["Tables"]["tour_timeline_events"]["Update"];

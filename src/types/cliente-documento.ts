@@ -26,16 +26,3 @@ export type ClienteDocumentoView = ClienteDocumento & {
 export type ClienteDocumentiData = {
   documenti: ClienteDocumentoView[];
 };
-
-/** Shape prevista per Supabase — non collegata ancora. */
-export type ClienteDocumentoRow = {
-  id: string;
-  cliente_id: string;
-  tipo: ClienteDocumentoTipo;
-  numero: string;
-  scadenza: string;
-  allegato_nome: string | null;
-  allegato_url: string | null;
-  creato_il: string;
-  aggiornato_il: string;
-};

@@ -1,6 +1,6 @@
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
-import { formatViaggiInsieme } from "@/lib/clienti/relazioni-viaggiatore.data";
+import { formatViaggiInsieme } from "@/models/relazioni-viaggiatore";
 import { profiloItemCard } from "@/lib/clienti/profilo-ui";
 import type { RelazionePersona } from "@/types/relazioni-viaggiatore";
 

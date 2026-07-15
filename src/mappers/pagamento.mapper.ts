@@ -4,9 +4,17 @@ import {
   parsePrezzoTour,
 } from "@/models/pagamento";
 import { mapTourPaymentRowToPagamento } from "@/mappers/tour-payment.mapper";
+import { mapPartecipazioneToTourClienteView } from "@/mappers/tour-partecipazione.mapper";
 import type { TourPaymentRow } from "@/types/database";
-import type { PartecipazioneTourView } from "@/types/tour-partecipazione";
+import type { Tour } from "@/types/tour";
 import type {
+  PartecipazioneTour,
+  PartecipazioneTourView,
+} from "@/types/tour-partecipazione";
+import type {
+  ClientePagamentiData,
+  ClientePagamentiRiepilogo,
+  ClienteTourPagamentoView,
   Pagamento,
   PartecipantePagamentoView,
   TourPagamentiData,
@@ -111,4 +119,87 @@ export function mapTourPagamentiData(
 /** Mapper Supabase tour_payments. */
 export function mapPagamentoRowToPagamento(row: TourPaymentRow): Pagamento {
   return mapTourPaymentRowToPagamento(row);
+}
+
+function toPartecipazioneTourView(
+  partecipazione: PartecipazioneTour,
+): PartecipazioneTourView {
+  return {
+    ...partecipazione,
+    clienteNome: "",
+    clienteEmail: "",
+    clienteStato: "Attivo",
+  };
+}
+
+export function computeClientePagamentiRiepilogo(
+  perTour: ClienteTourPagamentoView[],
+): ClientePagamentiRiepilogo {
+  const totaleVersato = perTour.reduce(
+    (sum, item) =>
+      sum + item.partecipante.accontoVersato + item.partecipante.saldoVersato,
+    0,
+  );
+  const importoResiduo = perTour.reduce(
+    (sum, item) => sum + item.partecipante.importoResiduo,
+    0,
+  );
+  const numeroPagamenti = perTour.reduce(
+    (sum, item) => sum + item.partecipante.pagamenti.length,
+    0,
+  );
+  const tourConSaldoAperto = perTour.filter(
+    (item) => item.partecipante.statoPagamento !== "Saldo completato",
+  ).length;
+
+  return {
+    totaleVersato,
+    importoResiduo,
+    numeroPagamenti,
+    tourConSaldoAperto,
+  };
+}
+
+export function mapClientePagamentiData(
+  partecipazioni: PartecipazioneTour[],
+  pagamenti: Pagamento[],
+  toursById: Map<string, Tour>,
+): ClientePagamentiData {
+  const perTour = partecipazioni
+    .map((partecipazione) => {
+      const tourView = mapPartecipazioneToTourClienteView(
+        partecipazione,
+        toursById,
+      );
+      if (!tourView) return null;
+
+      const tour = toursById.get(partecipazione.tourId);
+      if (!tour) return null;
+
+      const partecipante = mapPartecipantePagamentoView(
+        toPartecipazioneTourView(partecipazione),
+        pagamenti,
+        parsePrezzoTour(tour.prezzo),
+      );
+
+      return {
+        tourId: tourView.tourId,
+        nomeTour: tourView.nomeTour,
+        destinazione: tourView.destinazione,
+        anno: tourView.anno,
+        statoTour: tourView.statoTour,
+        partecipante,
+      };
+    })
+    .filter((item): item is ClienteTourPagamentoView => item !== null)
+    .sort(
+      (a, b) =>
+        b.anno - a.anno ||
+        a.nomeTour.localeCompare(b.nomeTour, "it"),
+    );
+
+  return {
+    perTour,
+    riepilogo: computeClientePagamentiRiepilogo(perTour),
+  };
 }
