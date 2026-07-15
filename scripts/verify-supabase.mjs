@@ -22,6 +22,14 @@ const SPRINT_1A_TABLES = [
   "tour_timeline_events",
 ];
 
+const SPRINT_1B_TABLES = [
+  "tour_program_days",
+  "tour_program_activities",
+  "tour_flights",
+  "tour_transfers",
+  "tour_insurances",
+];
+
 async function verifySupabaseConnection() {
   if (!url || !anonKey) {
     console.error("❌ Variabili mancanti in .env.local:");
@@ -61,7 +69,7 @@ async function verifySupabaseConnection() {
   }
 
   let missing = 0;
-  for (const table of SPRINT_1A_TABLES) {
+  for (const table of [...SPRINT_1A_TABLES, ...SPRINT_1B_TABLES]) {
     const { error } = await supabase.from(table).select("id").limit(1);
     if (error) {
       if (
@@ -89,7 +97,7 @@ async function verifySupabaseConnection() {
     process.exit(1);
   }
 
-  console.log("✅ Sprint 1A — tutte le tabelle tour sono accessibili.");
+  console.log("✅ Sprint 1A + 1B — tutte le tabelle tour sono accessibili.");
   process.exit(0);
 }
 

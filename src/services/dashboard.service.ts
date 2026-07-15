@@ -5,6 +5,7 @@ import {
 } from "@/mappers/dashboard.mapper";
 import { getCamereByTourId } from "@/services/camera.service";
 import { getClienti } from "@/services/clienti.service";
+import { countAssicurazioniDaEmettere } from "@/services/tour-insurance.service";
 import { getPartecipazioniByTourId } from "@/services/tour-partecipazione.service";
 import { getTours } from "@/services/tour.service";
 import type { CameraView } from "@/types/camera";
@@ -18,7 +19,11 @@ import type { PartecipazioneTourView } from "@/types/tour-partecipazione";
 let cachedSearchIndex: DashboardSearchIndex | null = null;
 
 async function loadAggregationData() {
-  const [clienti, tours] = await Promise.all([getClienti(), getTours()]);
+  const [clienti, tours, assicurazioniMancanti] = await Promise.all([
+    getClienti(),
+    getTours(),
+    countAssicurazioniDaEmettere().catch(() => 0),
+  ]);
 
   const activeTours = tours.filter(
     (tour) =>
@@ -38,7 +43,7 @@ async function loadAggregationData() {
     }),
   );
 
-  return { clienti, tours, partecipazioniByTour, camereByTour };
+  return { clienti, tours, partecipazioniByTour, camereByTour, assicurazioniMancanti };
 }
 
 export async function getDashboardData(): Promise<DashboardData> {

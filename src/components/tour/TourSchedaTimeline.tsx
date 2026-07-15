@@ -60,7 +60,7 @@ export function TourSchedaTimeline({ tourId }: TourSchedaTimelineProps) {
           <EmptyState
             icon={Clock3}
             title="Nessun evento"
-            description="Gli eventi verranno registrati quando crei tour, partecipanti, pagamenti o documenti."
+            description="Gli eventi verranno registrati quando crei tour, partecipanti, pagamenti, documenti o logistica."
           />
         ) : (
           <Timeline eventi={eventi} />

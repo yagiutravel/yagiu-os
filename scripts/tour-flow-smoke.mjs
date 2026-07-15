@@ -199,6 +199,103 @@ async function main() {
   if (timelineError) fail(`timeline event: ${timelineError.message}`);
   ok("Timeline event registrato");
 
+  const { data: programDay, error: programDayError } = await supabase
+    .from("tour_program_days")
+    .insert({
+      organization_id: organizationId,
+      tour_id: tour.id,
+      giorno_numero: 1,
+      data: "2026-09-01",
+      titolo: "Giorno 1",
+      hotel_id: hotel.id,
+    })
+    .select("id")
+    .single();
+
+  if (programDayError) fail(`create program day: ${programDayError.message}`);
+  ok(`Giorno programma creato (${programDay.id})`);
+
+  const { data: activity, error: activityError } = await supabase
+    .from("tour_program_activities")
+    .insert({
+      organization_id: organizationId,
+      tour_id: tour.id,
+      day_id: programDay.id,
+      titolo: "Visita centro storico",
+      tipo: "visita",
+      luogo: "Test City",
+    })
+    .select("id")
+    .single();
+
+  if (activityError) fail(`create activity: ${activityError.message}`);
+  ok(`Attività creata (${activity.id})`);
+
+  const { data: flight, error: flightError } = await supabase
+    .from("tour_flights")
+    .insert({
+      organization_id: organizationId,
+      tour_id: tour.id,
+      day_id: programDay.id,
+      direzione: "andata",
+      numero_volo: "AZ123",
+      aeroporto_partenza: "FCO",
+      aeroporto_arrivo: "TST",
+      data_partenza: "2026-09-01",
+    })
+    .select("id")
+    .single();
+
+  if (flightError) fail(`create flight: ${flightError.message}`);
+  ok(`Volo creato (${flight.id})`);
+
+  const { data: transfer, error: transferError } = await supabase
+    .from("tour_transfers")
+    .insert({
+      organization_id: organizationId,
+      tour_id: tour.id,
+      day_id: programDay.id,
+      tipo: "bus",
+      partenza: "Aeroporto",
+      destinazione: "Hotel",
+      data: "2026-09-01",
+    })
+    .select("id")
+    .single();
+
+  if (transferError) fail(`create transfer: ${transferError.message}`);
+  ok(`Transfer creato (${transfer.id})`);
+
+  const { data: insurance, error: insuranceError } = await supabase
+    .from("tour_insurances")
+    .insert({
+      organization_id: organizationId,
+      tour_id: tour.id,
+      fornitore: "Smoke Insurance",
+      stato: "da_emettere",
+      premio_cents: 4500,
+    })
+    .select("id")
+    .single();
+
+  if (insuranceError) fail(`create insurance: ${insuranceError.message}`);
+  ok(`Assicurazione creata (${insurance.id})`);
+
+  const { error: logisticaTimelineError } = await supabase
+    .from("tour_timeline_events")
+    .insert({
+      organization_id: organizationId,
+      tour_id: tour.id,
+      tipo: "programma_giorno",
+      titolo: "Smoke programma",
+      descrizione: "Verifica timeline Sprint 1B",
+    });
+
+  if (logisticaTimelineError) {
+    fail(`timeline 1B event: ${logisticaTimelineError.message}`);
+  }
+  ok("Timeline Sprint 1B verificata");
+
   const { data: reloadTour, error: reloadError } = await supabase
     .from("tours")
     .select("id")

@@ -5,7 +5,12 @@ export type TimelineEventoTipo =
   | "tour_completato"
   | "email_inviata"
   | "nota_interna"
-  | "telefonata";
+  | "telefonata"
+  | "programma_giorno"
+  | "attivita"
+  | "volo"
+  | "transfer"
+  | "assicurazione";
 
 export type TimelineEvento = {
   id: string;

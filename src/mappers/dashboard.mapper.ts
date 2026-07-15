@@ -8,7 +8,6 @@ import {
   IMPORTO_SALDO_MEDIO,
 } from "@/models/dashboard";
 import {
-  MOCK_ASSICURAZIONI_MANCANTI,
   MOCK_COMPLEANNI_MESE,
   MOCK_LIBERATORIE_MANCANTI,
 } from "@/mock/dashboard";
@@ -38,6 +37,7 @@ type DashboardAggregationInput = {
   tours: Tour[];
   partecipazioniByTour: Map<string, PartecipazioneTourView[]>;
   camereByTour: Map<string, CameraView[]>;
+  assicurazioniMancanti?: number;
   now?: Date;
 };
 
@@ -102,6 +102,7 @@ export function mapPagamenti(
 
 export function mapDocumenti(
   partecipazioni: PartecipazioneTourView[],
+  assicurazioniMancanti = 0,
 ): DashboardDocumenti {
   const questionariMancanti = partecipazioni.filter(
     (item) => item.questionario === "Da compilare",
@@ -113,7 +114,7 @@ export function mapDocumenti(
   return {
     passaportiMancanti,
     questionariMancanti,
-    assicurazioniMancanti: MOCK_ASSICURAZIONI_MANCANTI,
+    assicurazioniMancanti,
     liberatorieMancanti: MOCK_LIBERATORIE_MANCANTI,
   };
 }
@@ -462,7 +463,10 @@ export function mapDashboardData(input: DashboardAggregationInput): DashboardDat
 
   const tourInPartenza = mapTourInPartenza(tours, now);
   const pagamenti = mapPagamenti(allPartecipazioni);
-  const documenti = mapDocumenti(allPartecipazioni);
+  const documenti = mapDocumenti(
+    allPartecipazioni,
+    input.assicurazioniMancanti ?? 0,
+  );
   const camere = mapCamere(camereByTour);
   const viaggiatori = mapViaggiatori(
     clienti,

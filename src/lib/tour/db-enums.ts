@@ -1,5 +1,9 @@
 import type { MetodoPagamento, TipoPagamento } from "@/types/pagamento";
 import type { CategoriaDocumentoTour } from "@/types/tour-documento";
+import type { DirezioneVolo } from "@/types/tour-flight";
+import type { StatoAssicurazioneTour } from "@/types/tour-insurance";
+import type { TipoAttivitaProgramma } from "@/types/tour-program";
+import type { TipoTransfer } from "@/types/tour-transfer";
 import type { TipologiaCamera } from "@/types/camera";
 import type {
   DocumentiPartecipante,
@@ -284,4 +288,122 @@ export function mapUiCategoriaDocumentoToDb(
   value: CategoriaDocumentoTour,
 ): DbCategoriaDocumentoTour {
   return CATEGORIA_DOCUMENTO_TO_DB[value];
+}
+
+export type DbTipoAttivitaProgramma =
+  | "visita"
+  | "pasto"
+  | "trasferimento"
+  | "libero"
+  | "altro";
+export type DbDirezioneVolo = "andata" | "ritorno" | "interno";
+export type DbTipoTransfer = "bus" | "van" | "treno" | "barca" | "privato" | "altro";
+export type DbStatoAssicurazioneTour =
+  | "da_emettere"
+  | "attiva"
+  | "scaduta"
+  | "annullata";
+
+const TIPO_ATTIVITA_TO_UI: Record<DbTipoAttivitaProgramma, TipoAttivitaProgramma> = {
+  visita: "Visita",
+  pasto: "Pasto",
+  trasferimento: "Trasferimento",
+  libero: "Libero",
+  altro: "Altro",
+};
+
+const TIPO_ATTIVITA_TO_DB: Record<TipoAttivitaProgramma, DbTipoAttivitaProgramma> = {
+  Visita: "visita",
+  Pasto: "pasto",
+  Trasferimento: "trasferimento",
+  Libero: "libero",
+  Altro: "altro",
+};
+
+const DIREZIONE_VOLO_TO_UI: Record<DbDirezioneVolo, DirezioneVolo> = {
+  andata: "Andata",
+  ritorno: "Ritorno",
+  interno: "Interno",
+};
+
+const DIREZIONE_VOLO_TO_DB: Record<DirezioneVolo, DbDirezioneVolo> = {
+  Andata: "andata",
+  Ritorno: "ritorno",
+  Interno: "interno",
+};
+
+const TIPO_TRANSFER_TO_UI: Record<DbTipoTransfer, TipoTransfer> = {
+  bus: "Bus",
+  van: "Van",
+  treno: "Treno",
+  barca: "Barca",
+  privato: "Privato",
+  altro: "Altro",
+};
+
+const TIPO_TRANSFER_TO_DB: Record<TipoTransfer, DbTipoTransfer> = {
+  Bus: "bus",
+  Van: "van",
+  Treno: "treno",
+  Barca: "barca",
+  Privato: "privato",
+  Altro: "altro",
+};
+
+const STATO_ASSICURAZIONE_TO_UI: Record<
+  DbStatoAssicurazioneTour,
+  StatoAssicurazioneTour
+> = {
+  da_emettere: "Da emettere",
+  attiva: "Attiva",
+  scaduta: "Scaduta",
+  annullata: "Annullata",
+};
+
+const STATO_ASSICURAZIONE_TO_DB: Record<
+  StatoAssicurazioneTour,
+  DbStatoAssicurazioneTour
+> = {
+  "Da emettere": "da_emettere",
+  Attiva: "attiva",
+  Scaduta: "scaduta",
+  Annullata: "annullata",
+};
+
+export function mapDbTipoAttivitaToUi(value: string): TipoAttivitaProgramma {
+  return TIPO_ATTIVITA_TO_UI[value as DbTipoAttivitaProgramma] ?? "Visita";
+}
+
+export function mapUiTipoAttivitaToDb(
+  value: TipoAttivitaProgramma,
+): DbTipoAttivitaProgramma {
+  return TIPO_ATTIVITA_TO_DB[value];
+}
+
+export function mapDbDirezioneVoloToUi(value: string): DirezioneVolo {
+  return DIREZIONE_VOLO_TO_UI[value as DbDirezioneVolo] ?? "Andata";
+}
+
+export function mapUiDirezioneVoloToDb(value: DirezioneVolo): DbDirezioneVolo {
+  return DIREZIONE_VOLO_TO_DB[value];
+}
+
+export function mapDbTipoTransferToUi(value: string): TipoTransfer {
+  return TIPO_TRANSFER_TO_UI[value as DbTipoTransfer] ?? "Bus";
+}
+
+export function mapUiTipoTransferToDb(value: TipoTransfer): DbTipoTransfer {
+  return TIPO_TRANSFER_TO_DB[value];
+}
+
+export function mapDbStatoAssicurazioneToUi(
+  value: string,
+): StatoAssicurazioneTour {
+  return STATO_ASSICURAZIONE_TO_UI[value as DbStatoAssicurazioneTour] ?? "Da emettere";
+}
+
+export function mapUiStatoAssicurazioneToDb(
+  value: StatoAssicurazioneTour,
+): DbStatoAssicurazioneTour {
+  return STATO_ASSICURAZIONE_TO_DB[value];
 }

@@ -5,7 +5,12 @@ import {
   Flag,
   Mail,
   Phone,
+  Plane,
+  Route,
+  Shield,
   StickyNote,
+  MapPin,
+  CalendarDays,
   type LucideIcon,
 } from "lucide-react";
 import type { TimelineEventoTipo } from "@/types/timeline-viaggiatore";
@@ -67,5 +72,40 @@ export const TIMELINE_EVENTO_CONFIG: Record<TimelineEventoTipo, TimelineEventoSt
     bg: "bg-rose-50",
     text: "text-rose-700",
     ring: "ring-rose-600/20",
+  },
+  programma_giorno: {
+    label: "Programma",
+    icon: CalendarDays,
+    bg: "bg-indigo-50",
+    text: "text-indigo-700",
+    ring: "ring-indigo-600/20",
+  },
+  attivita: {
+    label: "Attività",
+    icon: MapPin,
+    bg: "bg-teal-50",
+    text: "text-teal-700",
+    ring: "ring-teal-600/20",
+  },
+  volo: {
+    label: "Volo",
+    icon: Plane,
+    bg: "bg-cyan-50",
+    text: "text-cyan-700",
+    ring: "ring-cyan-600/20",
+  },
+  transfer: {
+    label: "Transfer",
+    icon: Route,
+    bg: "bg-orange-50",
+    text: "text-orange-700",
+    ring: "ring-orange-600/20",
+  },
+  assicurazione: {
+    label: "Assicurazione",
+    icon: Shield,
+    bg: "bg-lime-50",
+    text: "text-lime-700",
+    ring: "ring-lime-600/20",
   },
 };

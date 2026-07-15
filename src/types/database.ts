@@ -548,6 +548,239 @@ export type Database = {
         };
         Relationships: [];
       };
+      tour_program_days: {
+        Row: TimestampFields & {
+          id: string;
+          organization_id: string;
+          tour_id: string;
+          giorno_numero: number;
+          data: string | null;
+          titolo: string;
+          descrizione: string;
+          hotel_id: string | null;
+          ordine: number;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          tour_id: string;
+          giorno_numero: number;
+          data?: string | null;
+          titolo?: string;
+          descrizione?: string;
+          hotel_id?: string | null;
+          ordine?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          organization_id?: string;
+          tour_id?: string;
+          giorno_numero?: number;
+          data?: string | null;
+          titolo?: string;
+          descrizione?: string;
+          hotel_id?: string | null;
+          ordine?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      tour_program_activities: {
+        Row: TimestampFields & {
+          id: string;
+          organization_id: string;
+          tour_id: string;
+          day_id: string;
+          titolo: string;
+          descrizione: string;
+          ora_inizio: string | null;
+          ora_fine: string | null;
+          luogo: string;
+          tipo: string;
+          ordine: number;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          tour_id: string;
+          day_id: string;
+          titolo: string;
+          descrizione?: string;
+          ora_inizio?: string | null;
+          ora_fine?: string | null;
+          luogo?: string;
+          tipo?: string;
+          ordine?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          organization_id?: string;
+          tour_id?: string;
+          day_id?: string;
+          titolo?: string;
+          descrizione?: string;
+          ora_inizio?: string | null;
+          ora_fine?: string | null;
+          luogo?: string;
+          tipo?: string;
+          ordine?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      tour_flights: {
+        Row: TimestampFields & {
+          id: string;
+          organization_id: string;
+          tour_id: string;
+          day_id: string | null;
+          direzione: string;
+          compagnia: string;
+          numero_volo: string;
+          aeroporto_partenza: string;
+          aeroporto_arrivo: string;
+          data_partenza: string;
+          ora_partenza: string | null;
+          data_arrivo: string | null;
+          ora_arrivo: string | null;
+          note: string;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          tour_id: string;
+          day_id?: string | null;
+          direzione?: string;
+          compagnia?: string;
+          numero_volo: string;
+          aeroporto_partenza?: string;
+          aeroporto_arrivo?: string;
+          data_partenza: string;
+          ora_partenza?: string | null;
+          data_arrivo?: string | null;
+          ora_arrivo?: string | null;
+          note?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          organization_id?: string;
+          tour_id?: string;
+          day_id?: string | null;
+          direzione?: string;
+          compagnia?: string;
+          numero_volo?: string;
+          aeroporto_partenza?: string;
+          aeroporto_arrivo?: string;
+          data_partenza?: string;
+          ora_partenza?: string | null;
+          data_arrivo?: string | null;
+          ora_arrivo?: string | null;
+          note?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      tour_transfers: {
+        Row: TimestampFields & {
+          id: string;
+          organization_id: string;
+          tour_id: string;
+          day_id: string | null;
+          tipo: string;
+          partenza: string;
+          destinazione: string;
+          data: string;
+          ora: string | null;
+          fornitore: string;
+          note: string;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          tour_id: string;
+          day_id?: string | null;
+          tipo?: string;
+          partenza: string;
+          destinazione: string;
+          data: string;
+          ora?: string | null;
+          fornitore?: string;
+          note?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          organization_id?: string;
+          tour_id?: string;
+          day_id?: string | null;
+          tipo?: string;
+          partenza?: string;
+          destinazione?: string;
+          data?: string;
+          ora?: string | null;
+          fornitore?: string;
+          note?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      tour_insurances: {
+        Row: TimestampFields & {
+          id: string;
+          organization_id: string;
+          tour_id: string;
+          fornitore: string;
+          polizza_numero: string;
+          copertura: string;
+          premio_cents: number;
+          data_inizio: string | null;
+          data_fine: string | null;
+          stato: string;
+          note: string;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          tour_id: string;
+          fornitore: string;
+          polizza_numero?: string;
+          copertura?: string;
+          premio_cents?: number;
+          data_inizio?: string | null;
+          data_fine?: string | null;
+          stato?: string;
+          note?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          organization_id?: string;
+          tour_id?: string;
+          fornitore?: string;
+          polizza_numero?: string;
+          copertura?: string;
+          premio_cents?: number;
+          data_inizio?: string | null;
+          data_fine?: string | null;
+          stato?: string;
+          note?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: {
       tour_stats: {
@@ -620,3 +853,30 @@ export type TourTimelineEventRow =
   Database["public"]["Tables"]["tour_timeline_events"]["Row"];
 export type TourTimelineEventInsert =
   Database["public"]["Tables"]["tour_timeline_events"]["Insert"];
+export type TourProgramDayRow =
+  Database["public"]["Tables"]["tour_program_days"]["Row"];
+export type TourProgramDayInsert =
+  Database["public"]["Tables"]["tour_program_days"]["Insert"];
+export type TourProgramDayUpdate =
+  Database["public"]["Tables"]["tour_program_days"]["Update"];
+export type TourProgramActivityRow =
+  Database["public"]["Tables"]["tour_program_activities"]["Row"];
+export type TourProgramActivityInsert =
+  Database["public"]["Tables"]["tour_program_activities"]["Insert"];
+export type TourProgramActivityUpdate =
+  Database["public"]["Tables"]["tour_program_activities"]["Update"];
+export type TourFlightRow = Database["public"]["Tables"]["tour_flights"]["Row"];
+export type TourFlightInsert = Database["public"]["Tables"]["tour_flights"]["Insert"];
+export type TourFlightUpdate = Database["public"]["Tables"]["tour_flights"]["Update"];
+export type TourTransferRow =
+  Database["public"]["Tables"]["tour_transfers"]["Row"];
+export type TourTransferInsert =
+  Database["public"]["Tables"]["tour_transfers"]["Insert"];
+export type TourTransferUpdate =
+  Database["public"]["Tables"]["tour_transfers"]["Update"];
+export type TourInsuranceRow =
+  Database["public"]["Tables"]["tour_insurances"]["Row"];
+export type TourInsuranceInsert =
+  Database["public"]["Tables"]["tour_insurances"]["Insert"];
+export type TourInsuranceUpdate =
+  Database["public"]["Tables"]["tour_insurances"]["Update"];

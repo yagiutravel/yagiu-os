@@ -23,6 +23,7 @@ import { TourSchedaCamere } from "./TourSchedaCamere";
 import { TourSchedaPagamenti } from "./TourSchedaPagamenti";
 import { TourSchedaChecklist } from "./TourSchedaChecklist";
 import { TourSchedaDocumenti } from "./TourSchedaDocumenti";
+import { TourSchedaProgramma } from "./TourSchedaProgramma";
 
 export function TourSchedaView() {
   const router = useRouter();
@@ -117,6 +118,8 @@ export function TourSchedaView() {
             <TourSchedaDocumenti tourId={tour.id} />
           ) : sezioneAttiva === "checklist" ? (
             <TourSchedaChecklist tourId={tour.id} />
+          ) : sezioneAttiva === "programma" ? (
+            <TourSchedaProgramma tourId={tour.id} />
           ) : (
             <TourSchedaSectionPlaceholder sezione={sezioneCorrente} />
           )}

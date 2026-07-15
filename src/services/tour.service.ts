@@ -11,6 +11,7 @@ import {
 import { invalidateDashboardCache } from "@/services/dashboard.service";
 import { invalidateGlobalSearchIndex } from "@/services/global-search.service";
 import { seedDefaultChecklistTemplates } from "@/services/tour-checklist.service";
+import { seedProgramDaysFromTour } from "@/services/tour-program.service";
 import { recordTourTimelineEvent } from "@/services/tour-timeline.service";
 import type { TourStaffRow, TourRow, TourStatsRow } from "@/types/database";
 import type {
@@ -222,6 +223,11 @@ export async function createTour(input: CreateTourInput): Promise<Tour> {
 
   const [tour] = await mapTourRowsToTours([tourRow]);
   await seedDefaultChecklistTemplates(tourRow.id);
+  await seedProgramDaysFromTour(
+    tourRow.id,
+    tourRow.data_partenza,
+    tourRow.data_ritorno,
+  );
   await recordTourTimelineEvent({
     tourId: tourRow.id,
     tipo: "prenotazione",
