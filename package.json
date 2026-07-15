@@ -9,6 +9,7 @@
     "lint": "eslint",
     "supabase:verify": "node --env-file=.env.local scripts/verify-supabase.mjs",
     "supabase:apply-migrations": "node --env-file=.env.local scripts/apply-migrations.mjs",
+    "bootstrap:sprint3": "node --env-file=.env.local scripts/bootstrap-sprint3.mjs",
     "test:tour-flow": "node --env-file=.env.local scripts/tour-flow-smoke.mjs",
     "test:preventivi-flow": "node --env-file=.env.local scripts/preventivi-flow-smoke.mjs",
     "test:auth-flow": "node --env-file=.env.local scripts/auth-flow-smoke.mjs",

@@ -93,10 +93,12 @@ async function verifySupabaseConnection() {
   if (missingSprint3 > 0) {
     console.log("");
     console.log("Sprint 3: tabelle auth/tenant non visibili in PostgREST.");
-    console.log("Se hai già eseguito la migration, in SQL Editor lancia:");
-    console.log("  NOTIFY pgrst, 'reload schema';");
-    console.log("Altrimenti riesegui:");
-    console.log("  supabase/migrations/20260715300000_sprint_3_auth_multi_tenant.sql");
+    console.log("Esegui il bootstrap automatico:");
+    console.log("  npm run bootstrap:sprint3");
+    console.log("");
+    console.log("Prerequisito in .env.local:");
+    console.log("  SUPABASE_DB_PASSWORD=<database password>");
+    console.log("  oppure SUPABASE_DB_URL=postgresql://...");
     process.exit(1);
   }
 

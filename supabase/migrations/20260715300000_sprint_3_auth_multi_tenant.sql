@@ -230,42 +230,57 @@ CREATE TRIGGER trg_clienti_auth_fields
   EXECUTE FUNCTION public.set_auth_audit_fields();
 
 -- ---------------------------------------------------------------------------
--- organization_id on audit_log, notifiche
+-- organization_id on audit_log, notifiche (solo se presenti nello schema legacy)
 -- ---------------------------------------------------------------------------
-ALTER TABLE public.audit_log
-  ADD COLUMN IF NOT EXISTS organization_id UUID REFERENCES public.organizations (id) ON DELETE CASCADE,
-  ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES auth.users (id) ON DELETE SET NULL;
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.tables
+    WHERE table_schema = 'public' AND table_name = 'audit_log'
+  ) THEN
+    ALTER TABLE public.audit_log
+      ADD COLUMN IF NOT EXISTS organization_id UUID REFERENCES public.organizations (id) ON DELETE CASCADE,
+      ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES auth.users (id) ON DELETE SET NULL;
 
-UPDATE public.audit_log
-SET organization_id = '00000000-0000-4000-8000-000000000001'
-WHERE organization_id IS NULL;
+    UPDATE public.audit_log
+    SET organization_id = '00000000-0000-4000-8000-000000000001'
+    WHERE organization_id IS NULL;
 
-ALTER TABLE public.audit_log
-  ALTER COLUMN organization_id SET NOT NULL;
+    ALTER TABLE public.audit_log
+      ALTER COLUMN organization_id SET NOT NULL;
 
-CREATE INDEX IF NOT EXISTS idx_audit_log_organization_id ON public.audit_log (organization_id);
+    CREATE INDEX IF NOT EXISTS idx_audit_log_organization_id ON public.audit_log (organization_id);
 
-ALTER TABLE public.notifiche
-  ADD COLUMN IF NOT EXISTS organization_id UUID REFERENCES public.organizations (id) ON DELETE CASCADE,
-  ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES auth.users (id) ON DELETE SET NULL;
+    ALTER TABLE public.audit_log DROP CONSTRAINT IF EXISTS audit_log_tipo_check;
+    ALTER TABLE public.audit_log
+      ADD CONSTRAINT audit_log_tipo_check
+      CHECK (tipo IN (
+        'cliente', 'pagamento', 'camera', 'tour', 'documento', 'partecipante',
+        'comunicazione', 'template_email', 'checklist', 'preventivo', 'auth', 'utente', 'generale'
+      ));
+  END IF;
+END $$;
 
-UPDATE public.notifiche
-SET organization_id = '00000000-0000-4000-8000-000000000001'
-WHERE organization_id IS NULL;
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.tables
+    WHERE table_schema = 'public' AND table_name = 'notifiche'
+  ) THEN
+    ALTER TABLE public.notifiche
+      ADD COLUMN IF NOT EXISTS organization_id UUID REFERENCES public.organizations (id) ON DELETE CASCADE,
+      ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES auth.users (id) ON DELETE SET NULL;
 
-ALTER TABLE public.notifiche
-  ALTER COLUMN organization_id SET NOT NULL;
+    UPDATE public.notifiche
+    SET organization_id = '00000000-0000-4000-8000-000000000001'
+    WHERE organization_id IS NULL;
 
-CREATE INDEX IF NOT EXISTS idx_notifiche_organization_id ON public.notifiche (organization_id);
+    ALTER TABLE public.notifiche
+      ALTER COLUMN organization_id SET NOT NULL;
 
--- Extend audit_log tipo for auth + preventivo (idempotent)
-ALTER TABLE public.audit_log DROP CONSTRAINT IF EXISTS audit_log_tipo_check;
-ALTER TABLE public.audit_log
-  ADD CONSTRAINT audit_log_tipo_check
-  CHECK (tipo IN (
-    'cliente', 'pagamento', 'camera', 'tour', 'documento', 'partecipante',
-    'comunicazione', 'template_email', 'checklist', 'preventivo', 'auth', 'utente', 'generale'
-  ));
+    CREATE INDEX IF NOT EXISTS idx_notifiche_organization_id ON public.notifiche (organization_id);
+  END IF;
+END $$;
 
 -- ---------------------------------------------------------------------------
 -- updated_by on tours and preventivi
@@ -649,4 +664,9 @@ BEGIN
 END $$;
 
 -- Ricarica schema PostgREST dopo nuove tabelle/policies
+GRANT ALL ON TABLE public.workspaces TO anon, authenticated, service_role;
+GRANT ALL ON TABLE public.user_profiles TO anon, authenticated, service_role;
+GRANT ALL ON TABLE public.memberships TO anon, authenticated, service_role;
+GRANT ALL ON TABLE public.auth_audit_events TO anon, authenticated, service_role;
+
 NOTIFY pgrst, 'reload schema';

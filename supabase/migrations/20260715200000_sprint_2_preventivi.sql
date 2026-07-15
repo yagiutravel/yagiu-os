@@ -138,3 +138,6 @@ BEGIN
       ));
   END IF;
 END $$;
+npm run bootstrap:sprint3
+npm run supabase:verify
+npm run test
