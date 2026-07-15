@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, startTransition } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
@@ -62,7 +62,9 @@ export function TourFormView({ mode, tourId }: TourFormViewProps) {
 
   useEffect(() => {
     if (mode === "edit") {
-      void loadTour();
+      startTransition(() => {
+        void loadTour();
+      });
     }
   }, [loadTour, mode]);
 

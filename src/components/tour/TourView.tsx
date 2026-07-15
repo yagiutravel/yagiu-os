@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, startTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Compass, Plus, SearchX } from "lucide-react";
@@ -50,7 +50,9 @@ export function TourView() {
   }, [showToast]);
 
   useEffect(() => {
-    void loadTours();
+    startTransition(() => {
+      void loadTours();
+    });
   }, [loadTours, refreshKey]);
 
   const processed = useMemo(

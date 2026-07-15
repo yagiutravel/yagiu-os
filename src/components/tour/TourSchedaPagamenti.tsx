@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, startTransition } from "react";
 import { Users } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/Card";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
@@ -75,7 +75,9 @@ export function TourSchedaPagamenti({ tourId }: TourSchedaPagamentiProps) {
   }, [showToast, tourId]);
 
   useEffect(() => {
-    void loadData();
+    startTransition(() => {
+      void loadData();
+    });
   }, [loadData]);
 
   const handleOpenCreate = (partecipante: PartecipantePagamentoView) => {

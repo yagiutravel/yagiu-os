@@ -26,6 +26,24 @@ async function main() {
   }
 
   const supabase = createClient(url, anonKey);
+
+  const { error: toursProbeError } = await supabase
+    .from("tours")
+    .select("id")
+    .limit(1);
+
+  if (
+    toursProbeError &&
+    (toursProbeError.code === "PGRST205" ||
+      toursProbeError.message.includes("Could not find the table"))
+  ) {
+    fail(
+      "Tabelle tour non trovate. Esegui prima le migration:\n" +
+        "  1. SQL Editor: supabase/migrations/*.sql\n" +
+        "  2. Oppure: npm run supabase:apply-migrations (con SUPABASE_DB_URL)",
+    );
+  }
+
   const suffix = Date.now();
   const tourSlug = `smoke-tour-${suffix}`;
 

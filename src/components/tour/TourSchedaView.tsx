@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, startTransition } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -50,7 +50,9 @@ export function TourSchedaView() {
   }, [params.id, showToast]);
 
   useEffect(() => {
-    void loadTour();
+    startTransition(() => {
+      void loadTour();
+    });
   }, [loadTour, refreshKey]);
 
   const sezioneCorrente =

@@ -81,9 +81,12 @@ async function verifySupabaseConnection() {
 
   if (missing > 0) {
     console.log(
-      "Esegui le migration in supabase/migrations/ dalla SQL Editor.",
+      "Esegui le migration in supabase/migrations/ dalla SQL Editor, oppure:",
     );
-    process.exit(0);
+    console.log(
+      "  npm run supabase:apply-migrations  (con SUPABASE_DB_URL in .env.local)",
+    );
+    process.exit(1);
   }
 
   console.log("✅ Sprint 1A — tutte le tabelle tour sono accessibili.");
