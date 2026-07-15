@@ -1,3 +1,4 @@
+import { getOrganizationId } from "@/config/organization";
 import { getSupabaseClient } from "@/config/supabase";
 import {
   mapCreateInputToInsert,
@@ -20,10 +21,12 @@ function handleSupabaseError(operation: string, error: { message: string; code?:
 
 export async function getClienti(): Promise<Cliente[]> {
   const supabase = getSupabaseClient();
+  const organizationId = await getOrganizationId();
 
   const { data, error } = await supabase
     .from(CLIENTI_TABLE)
     .select("*")
+    .eq("organization_id", organizationId)
     .order("created_at", { ascending: false });
 
   if (error) handleSupabaseError("getClienti", error);
@@ -33,11 +36,13 @@ export async function getClienti(): Promise<Cliente[]> {
 
 export async function getCliente(id: string): Promise<Cliente | null> {
   const supabase = getSupabaseClient();
+  const organizationId = await getOrganizationId();
 
   const { data, error } = await supabase
     .from(CLIENTI_TABLE)
     .select("*")
     .eq("id", id)
+    .eq("organization_id", organizationId)
     .maybeSingle();
 
   if (error) handleSupabaseError("getCliente", error);
@@ -48,10 +53,14 @@ export async function getCliente(id: string): Promise<Cliente | null> {
 
 export async function createCliente(input: CreateClienteInput): Promise<Cliente> {
   const supabase = getSupabaseClient();
+  const organizationId = await getOrganizationId();
 
   const { data, error } = await supabase
     .from(CLIENTI_TABLE)
-    .insert(mapCreateInputToInsert(input))
+    .insert({
+      ...mapCreateInputToInsert(input),
+      organization_id: organizationId,
+    })
     .select("*")
     .single();
 
@@ -65,6 +74,7 @@ export async function updateCliente(
   input: UpdateClienteInput,
 ): Promise<Cliente> {
   const supabase = getSupabaseClient();
+  const organizationId = await getOrganizationId();
   const payload = mapUpdateInputToUpdate(input);
 
   if (Object.keys(payload).length === 0) {
@@ -79,6 +89,7 @@ export async function updateCliente(
     .from(CLIENTI_TABLE)
     .update(payload)
     .eq("id", id)
+    .eq("organization_id", organizationId)
     .select("*")
     .single();
 
@@ -89,8 +100,13 @@ export async function updateCliente(
 
 export async function deleteCliente(id: string): Promise<void> {
   const supabase = getSupabaseClient();
+  const organizationId = await getOrganizationId();
 
-  const { error } = await supabase.from(CLIENTI_TABLE).delete().eq("id", id);
+  const { error } = await supabase
+    .from(CLIENTI_TABLE)
+    .delete()
+    .eq("id", id)
+    .eq("organization_id", organizationId);
 
   if (error) handleSupabaseError("deleteCliente", error);
 }

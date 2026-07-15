@@ -7,6 +7,7 @@ import {
   FileText,
   Mail,
   Settings,
+  Shield,
   UserPlus,
   Users,
   type LucideIcon,
@@ -94,6 +95,20 @@ export const AUDIT_LOG_TIPO_CONFIG: Record<
     bg: "bg-fuchsia-50",
     text: "text-fuchsia-700",
     ring: "ring-fuchsia-600/15",
+  },
+  auth: {
+    label: "Autenticazione",
+    icon: Shield,
+    bg: "bg-amber-50",
+    text: "text-amber-700",
+    ring: "ring-amber-600/15",
+  },
+  utente: {
+    label: "Utente",
+    icon: Users,
+    bg: "bg-cyan-50",
+    text: "text-cyan-700",
+    ring: "ring-cyan-600/15",
   },
   generale: {
     label: "Generale",

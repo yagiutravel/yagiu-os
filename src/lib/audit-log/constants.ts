@@ -15,6 +15,8 @@ export const AUDIT_LOG_TIPO_FILTRI: Array<{
   { value: "template_email", label: "Template email" },
   { value: "checklist", label: "Checklist" },
   { value: "preventivo", label: "Preventivo" },
+  { value: "auth", label: "Autenticazione" },
+  { value: "utente", label: "Utente" },
   { value: "generale", label: "Generale" },
 ];
 
@@ -29,5 +31,7 @@ export const AUDIT_LOG_TIPO_LABELS: Record<AuditLogEntitaTipo, string> = {
   template_email: "Template email",
   checklist: "Checklist",
   preventivo: "Preventivo",
+  auth: "Autenticazione",
+  utente: "Utente",
   generale: "Generale",
 };

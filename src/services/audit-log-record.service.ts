@@ -1,5 +1,10 @@
+import {
+  getAuthenticatedOrganizationId,
+  getAuthenticatedUserId,
+  getAuthenticatedUserLabel,
+} from "@/auth/session-store";
+import { getOrganizationId } from "@/config/organization";
 import { getSupabaseClient } from "@/config/supabase";
-import { AUDIT_UTENTE_SISTEMA } from "@/lib/audit/constants";
 import type { RecordAuditLogInput } from "@/lib/audit/constants";
 import type { AuditLogRow } from "@/types/audit-log";
 
@@ -20,9 +25,14 @@ function handleSupabaseError(operation: string, error: { message: string; code?:
 
 export async function recordAuditLog(input: RecordAuditLogInput): Promise<void> {
   const supabase = getSupabaseClient();
+  const organizationId =
+    getAuthenticatedOrganizationId() ?? (await getOrganizationId());
+  const userId = getAuthenticatedUserId();
 
   const { error } = await supabase.from(TABLE).insert({
-    utente: input.utente ?? AUDIT_UTENTE_SISTEMA,
+    organization_id: organizationId,
+    user_id: userId,
+    utente: input.utente ?? getAuthenticatedUserLabel(),
     azione: input.azione,
     tipo: input.tipo,
     azione_tipo: input.azioneTipo,
@@ -43,10 +53,12 @@ export async function recordAuditLog(input: RecordAuditLogInput): Promise<void> 
 
 export async function fetchAuditLogRows(limit = 200): Promise<AuditLogRow[]> {
   const supabase = getSupabaseClient();
+  const organizationId = await getOrganizationId();
 
   const { data, error } = await supabase
     .from(TABLE)
     .select("*")
+    .eq("organization_id", organizationId)
     .order("data", { ascending: false })
     .limit(limit);
 

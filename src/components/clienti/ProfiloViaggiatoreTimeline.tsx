@@ -27,10 +27,7 @@ export function ProfiloViaggiatoreTimeline({
   const loadTimeline = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await getClienteTimeline(
-        profilo.id,
-        profilo.profilo.nomeCompleto,
-      );
+      const data = await getClienteTimeline(profilo.id);
       setEventi(data.eventi);
     } catch (error) {
       showToast(
@@ -40,7 +37,7 @@ export function ProfiloViaggiatoreTimeline({
     } finally {
       setLoading(false);
     }
-  }, [profilo.id, profilo.profilo.nomeCompleto, showToast]);
+  }, [profilo.id, showToast]);
 
   useEffect(() => {
     startTransition(() => {

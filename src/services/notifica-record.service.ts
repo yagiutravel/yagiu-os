@@ -1,3 +1,5 @@
+import { getOrganizationId } from "@/config/organization";
+import { getAuthenticatedUserId } from "@/auth/session-store";
 import { getSupabaseClient } from "@/config/supabase";
 import type { NotificaTipo } from "@/types/notifica";
 
@@ -21,12 +23,16 @@ export type RecordNotificaInput = {
   titolo: string;
   messaggio: string;
   href?: string | null;
+  userId?: string | null;
 };
 
 export async function recordNotifica(input: RecordNotificaInput): Promise<void> {
   const supabase = getSupabaseClient();
+  const organizationId = await getOrganizationId();
 
   const { error } = await supabase.from(TABLE).insert({
+    organization_id: organizationId,
+    user_id: input.userId ?? getAuthenticatedUserId(),
     tipo: input.tipo,
     titolo: input.titolo,
     messaggio: input.messaggio,

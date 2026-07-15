@@ -72,6 +72,8 @@ export function mapClienteToClienteScheda(
     paese: null,
     note: null,
     created_by: null,
+    organization_id: "00000000-0000-4000-8000-000000000001",
+    updated_by: null,
   };
 
   return mapRowToClienteScheda(syntheticRow, source);

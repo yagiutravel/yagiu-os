@@ -35,6 +35,8 @@ export type Database = {
           paese: string | null;
           note: string | null;
           created_by: string | null;
+          organization_id: string;
+          updated_by: string | null;
         };
         Insert: {
           id?: string;
@@ -54,6 +56,8 @@ export type Database = {
           paese?: string | null;
           note?: string | null;
           created_by?: string | null;
+          organization_id?: string;
+          updated_by?: string | null;
         };
         Update: {
           id?: string;
@@ -73,6 +77,155 @@ export type Database = {
           paese?: string | null;
           note?: string | null;
           created_by?: string | null;
+          organization_id?: string;
+          updated_by?: string | null;
+        };
+        Relationships: [];
+      };
+      workspaces: {
+        Row: {
+          id: string;
+          organization_id: string;
+          name: string;
+          slug: string;
+          is_default: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          name: string;
+          slug: string;
+          is_default?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          organization_id?: string;
+          name?: string;
+          slug?: string;
+          is_default?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      user_profiles: {
+        Row: {
+          id: string;
+          organization_id: string;
+          workspace_id: string;
+          email: string;
+          display_name: string;
+          avatar_url: string | null;
+          job_title: string;
+          phone: string;
+          preferences: Json;
+          created_at: string;
+          updated_at: string;
+          created_by: string | null;
+          updated_by: string | null;
+        };
+        Insert: {
+          id: string;
+          organization_id: string;
+          workspace_id: string;
+          email?: string;
+          display_name?: string;
+          avatar_url?: string | null;
+          job_title?: string;
+          phone?: string;
+          preferences?: Json;
+          created_at?: string;
+          updated_at?: string;
+          created_by?: string | null;
+          updated_by?: string | null;
+        };
+        Update: {
+          id?: string;
+          organization_id?: string;
+          workspace_id?: string;
+          email?: string;
+          display_name?: string;
+          avatar_url?: string | null;
+          job_title?: string;
+          phone?: string;
+          preferences?: Json;
+          created_at?: string;
+          updated_at?: string;
+          created_by?: string | null;
+          updated_by?: string | null;
+        };
+        Relationships: [];
+      };
+      memberships: {
+        Row: {
+          id: string;
+          user_id: string;
+          organization_id: string;
+          workspace_id: string | null;
+          role_key: string;
+          scope: string;
+          status: string;
+          joined_at: string;
+          updated_at: string;
+          created_by: string | null;
+          updated_by: string | null;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          organization_id: string;
+          workspace_id?: string | null;
+          role_key: string;
+          scope: string;
+          status?: string;
+          joined_at?: string;
+          updated_at?: string;
+          created_by?: string | null;
+          updated_by?: string | null;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          organization_id?: string;
+          workspace_id?: string | null;
+          role_key?: string;
+          scope?: string;
+          status?: string;
+          joined_at?: string;
+          updated_at?: string;
+          created_by?: string | null;
+          updated_by?: string | null;
+        };
+        Relationships: [];
+      };
+      auth_audit_events: {
+        Row: {
+          id: string;
+          organization_id: string | null;
+          user_id: string | null;
+          event_type: string;
+          metadata: Json;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          organization_id?: string | null;
+          user_id?: string | null;
+          event_type: string;
+          metadata?: Json;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          organization_id?: string | null;
+          user_id?: string | null;
+          event_type?: string;
+          metadata?: Json;
+          created_at?: string;
         };
         Relationships: [];
       };
@@ -881,6 +1034,8 @@ export type Database = {
           entita_id: string | null;
           entita_label: string;
           data: string;
+          organization_id: string;
+          user_id: string | null;
         };
         Insert: {
           id?: string;
@@ -892,6 +1047,8 @@ export type Database = {
           entita_id?: string | null;
           entita_label?: string;
           data?: string;
+          organization_id: string;
+          user_id?: string | null;
         };
         Update: {
           id?: string;
@@ -903,6 +1060,8 @@ export type Database = {
           entita_id?: string | null;
           entita_label?: string;
           data?: string;
+          organization_id?: string;
+          user_id?: string | null;
         };
         Relationships: [];
       };
@@ -916,6 +1075,8 @@ export type Database = {
           href: string | null;
           letta: boolean;
           data: string;
+          organization_id: string;
+          user_id: string | null;
         };
         Insert: {
           id?: string;
@@ -926,6 +1087,8 @@ export type Database = {
           href?: string | null;
           letta?: boolean;
           data?: string;
+          organization_id: string;
+          user_id?: string | null;
         };
         Update: {
           id?: string;
@@ -936,6 +1099,8 @@ export type Database = {
           href?: string | null;
           letta?: boolean;
           data?: string;
+          organization_id?: string;
+          user_id?: string | null;
         };
         Relationships: [];
       };

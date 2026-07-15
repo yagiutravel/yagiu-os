@@ -3,6 +3,7 @@ import {
   mapDashboardData,
   searchDashboardIndex,
 } from "@/mappers/dashboard.mapper";
+import { getAuthenticatedUserLabel } from "@/auth/session-store";
 import { getCamereByTourId } from "@/services/camera.service";
 import { getClienti } from "@/services/clienti.service";
 import { countAssicurazioniDaEmettere } from "@/services/tour-insurance.service";
@@ -73,7 +74,11 @@ export async function getDashboardData(): Promise<DashboardData> {
     data.tours,
     data.partecipazioniByTour,
   );
-  return mapDashboardData({ ...data, now });
+  return mapDashboardData({
+    ...data,
+    userDisplayName: getAuthenticatedUserLabel(),
+    now,
+  });
 }
 
 export async function searchDashboard(

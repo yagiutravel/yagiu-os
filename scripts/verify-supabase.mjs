@@ -1,8 +1,9 @@
 /**
- * Verifica la connessione a Supabase e le tabelle Sprint 1A.
+ * Verifica la connessione a Supabase e le tabelle applicative.
  * Usage: npm run supabase:verify
  */
 import { createClient } from "@supabase/supabase-js";
+import { signInTestUser, signOutTestUser } from "./lib/test-auth.mjs";
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -32,6 +33,20 @@ const SPRINT_1B_TABLES = [
 
 const SPRINT_2_TABLES = ["preventivi", "preventivo_righe"];
 
+const SPRINT_3_TABLES = [
+  "workspaces",
+  "user_profiles",
+  "memberships",
+  "auth_audit_events",
+];
+
+function isMissingTable(error) {
+  return (
+    error?.code === "PGRST205" ||
+    error?.message?.includes("Could not find the table")
+  );
+}
+
 async function verifySupabaseConnection() {
   if (!url || !anonKey) {
     console.error("❌ Variabili mancanti in .env.local:");
@@ -51,35 +66,21 @@ async function verifySupabaseConnection() {
     process.exit(1);
   }
 
-  const { error: clientiError } = await supabase
-    .from("clienti")
-    .select("id")
-    .limit(1);
-
-  if (clientiError) {
-    if (
-      clientiError.code === "PGRST205" ||
-      clientiError.message.includes("Could not find the table")
-    ) {
-      console.log("⚠️  Tabella clienti non trovata — esegui supabase/schema.sql");
-    } else {
-      console.error("❌ Errore query clienti:", clientiError.message);
-      process.exit(1);
-    }
-  } else {
-    console.log("✅ Tabella clienti accessibile.");
-  }
-
   let missing = 0;
-  for (const table of [...SPRINT_1A_TABLES, ...SPRINT_1B_TABLES, ...SPRINT_2_TABLES]) {
+  let missingSprint3 = 0;
+
+  for (const table of [
+    ...SPRINT_1A_TABLES,
+    ...SPRINT_1B_TABLES,
+    ...SPRINT_2_TABLES,
+    ...SPRINT_3_TABLES,
+  ]) {
     const { error } = await supabase.from(table).select("id").limit(1);
     if (error) {
-      if (
-        error.code === "PGRST205" ||
-        error.message.includes("Could not find the table")
-      ) {
-        console.log(`⚠️  Tabella ${table} non trovata`);
+      if (isMissingTable(error)) {
+        console.log(`⚠️  Tabella ${table} non trovata nell'API`);
         missing += 1;
+        if (SPRINT_3_TABLES.includes(table)) missingSprint3 += 1;
       } else {
         console.error(`❌ Errore su ${table}:`, error.message);
         process.exit(1);
@@ -87,6 +88,16 @@ async function verifySupabaseConnection() {
     } else {
       console.log(`✅ Tabella ${table} accessibile.`);
     }
+  }
+
+  if (missingSprint3 > 0) {
+    console.log("");
+    console.log("Sprint 3: tabelle auth/tenant non visibili in PostgREST.");
+    console.log("Se hai già eseguito la migration, in SQL Editor lancia:");
+    console.log("  NOTIFY pgrst, 'reload schema';");
+    console.log("Altrimenti riesegui:");
+    console.log("  supabase/migrations/20260715300000_sprint_3_auth_multi_tenant.sql");
+    process.exit(1);
   }
 
   if (missing > 0) {
@@ -99,7 +110,33 @@ async function verifySupabaseConnection() {
     process.exit(1);
   }
 
-  console.log("✅ Sprint 1A + 1B + 2 — tutte le tabelle applicative sono accessibili.");
+  try {
+    await signInTestUser(supabase);
+    console.log("✅ Autenticazione test user OK.");
+  } catch (error) {
+    console.error("❌", error instanceof Error ? error.message : error);
+    console.error(
+      "   Imposta TEST_USER_EMAIL e TEST_USER_PASSWORD in .env.local",
+    );
+    process.exit(1);
+  }
+
+  const { error: clientiError } = await supabase
+    .from("clienti")
+    .select("id")
+    .limit(1);
+
+  if (clientiError) {
+    console.error("❌ Errore query clienti (autenticato):", clientiError.message);
+    process.exit(1);
+  }
+
+  console.log("✅ Tabella clienti accessibile (autenticato).");
+  await signOutTestUser(supabase);
+
+  console.log(
+    "✅ Sprint 1A + 1B + 2 + 3 — tutte le tabelle applicative sono accessibili.",
+  );
   process.exit(0);
 }
 

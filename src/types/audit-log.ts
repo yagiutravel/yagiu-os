@@ -9,6 +9,8 @@ export type AuditLogEntitaTipo =
   | "template_email"
   | "checklist"
   | "preventivo"
+  | "auth"
+  | "utente"
   | "generale";
 
 export type AuditLogAzioneTipo =

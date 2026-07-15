@@ -1,7 +1,6 @@
 import {
   AVVISO_LIVELLO_EMOJI,
   calcolaGiorniMancanti,
-  DASHBOARD_USER_NAME,
   getSalutoPeriodo,
   getSalutoTesto,
   IMPORTO_ACCONTO_MEDIO,
@@ -42,6 +41,7 @@ type DashboardAggregationInput = {
   preventiviInAttesa?: number;
   preventiviAccettati?: number;
   preventiviValoreInAttesa?: number;
+  userDisplayName?: string;
   now?: Date;
 };
 
@@ -452,12 +452,13 @@ export function calcolaAttivitaRichiedonoAttenzione(
 
 export function mapGreeting(
   attivitaRichiedonoAttenzione: number,
+  userDisplayName = "Team",
   now = new Date(),
 ): DashboardGreeting {
   const periodo = getSalutoPeriodo(now);
   return {
     saluto: getSalutoTesto(periodo),
-    nome: DASHBOARD_USER_NAME,
+    nome: userDisplayName,
     attivitaRichiedonoAttenzione,
   };
 }
@@ -508,7 +509,11 @@ export function mapDashboardData(input: DashboardAggregationInput): DashboardDat
   );
 
   return {
-    greeting: mapGreeting(attivitaRichiedonoAttenzione, now),
+    greeting: mapGreeting(
+      attivitaRichiedonoAttenzione,
+      input.userDisplayName,
+      now,
+    ),
     tourInPartenza,
     pagamenti,
     preventivi,

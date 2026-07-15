@@ -4,6 +4,7 @@
  */
 import { createClient } from "@supabase/supabase-js";
 import { randomUUID } from "node:crypto";
+import { signInTestUser, signOutTestUser } from "./lib/test-auth.mjs";
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -26,6 +27,8 @@ async function main() {
   }
 
   const supabase = createClient(url, anonKey);
+  await signInTestUser(supabase);
+  ok("Sessione test autenticata");
 
   const { error: probeError } = await supabase.from("preventivi").select("id").limit(1);
   if (
@@ -66,6 +69,7 @@ async function main() {
     .from("clienti")
     .insert({
       id: clienteId,
+      organization_id: organizationId,
       nome: `Smoke Cliente Preventivo ${suffix}`,
       email: `preventivo-${suffix}@example.com`,
       stato: "Attivo",
@@ -181,6 +185,7 @@ async function main() {
 
   await supabase.from("tours").delete().eq("id", tour.id);
   await supabase.from("clienti").delete().eq("id", cliente.id);
+  await signOutTestUser(supabase);
   ok("Cleanup completato");
 
   console.log("\n✅ Flusso Preventivi smoke test completato con successo.");

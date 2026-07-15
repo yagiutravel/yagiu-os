@@ -1,5 +1,5 @@
+import { getAuthenticatedUserLabel } from "@/auth/session-store";
 import { getSupabaseClient } from "@/config/supabase";
-import { AUDIT_UTENTE_SISTEMA } from "@/lib/audit/constants";
 import { mapClienteTimelineEventoRowToEvento } from "@/mappers/cliente-timeline.mapper";
 import type { ClienteTimelineEventoTipo } from "@/types/cliente-timeline";
 
@@ -36,7 +36,7 @@ export async function recordClienteTimelineEvent(
     tipo: input.tipo,
     titolo: input.titolo,
     descrizione: input.descrizione?.trim() ?? "",
-    utente: input.utente ?? AUDIT_UTENTE_SISTEMA,
+    utente: input.utente ?? getAuthenticatedUserLabel(),
   });
 
   if (error) {

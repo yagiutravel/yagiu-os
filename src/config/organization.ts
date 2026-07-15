@@ -1,3 +1,4 @@
+import { getAuthenticatedOrganizationId } from "@/auth/session-store";
 import { getSupabaseClient } from "@/config/supabase";
 
 export const DEFAULT_ORGANIZATION_ID =
@@ -10,6 +11,9 @@ function getEnvOrganizationId(): string | undefined {
 }
 
 export async function getOrganizationId(): Promise<string> {
+  const fromAuth = getAuthenticatedOrganizationId();
+  if (fromAuth) return fromAuth;
+
   const fromEnv = getEnvOrganizationId();
   if (fromEnv) return fromEnv;
 

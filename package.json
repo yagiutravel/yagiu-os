@@ -11,9 +11,11 @@
     "supabase:apply-migrations": "node --env-file=.env.local scripts/apply-migrations.mjs",
     "test:tour-flow": "node --env-file=.env.local scripts/tour-flow-smoke.mjs",
     "test:preventivi-flow": "node --env-file=.env.local scripts/preventivi-flow-smoke.mjs",
-    "test": "npm run test:tour-flow && npm run test:preventivi-flow"
+    "test:auth-flow": "node --env-file=.env.local scripts/auth-flow-smoke.mjs",
+    "test": "npm run test:auth-flow && npm run test:tour-flow && npm run test:preventivi-flow"
   },
   "dependencies": {
+    "@supabase/ssr": "^0.12.3",
     "@supabase/supabase-js": "^2.110.5",
     "lucide-react": "^1.24.0",
     "next": "16.2.10",
