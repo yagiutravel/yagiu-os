@@ -3,6 +3,7 @@
  * Usage: node --env-file=.env.local scripts/auth-flow-smoke.mjs
  */
 import { createClient } from "@supabase/supabase-js";
+import { assertSmokeTargetAllowed } from "./lib/guard-smoke-target.mjs";
 import { signInTestUser, signOutTestUser } from "./lib/test-auth.mjs";
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -18,6 +19,8 @@ function ok(message) {
 }
 
 async function main() {
+  assertSmokeTargetAllowed();
+
   if (!url || !anonKey) {
     fail("Variabili Supabase mancanti in .env.local");
   }

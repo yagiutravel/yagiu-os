@@ -248,7 +248,13 @@ export function ClientiView() {
       close();
     } catch (error) {
       setClienti(previousClienti);
-      showToast(`Impossibile eliminare il cliente. ${getErrorMessage(error)}`, "error");
+      const message = getErrorMessage(error);
+      showToast(
+        message.startsWith("Impossibile eliminare")
+          ? message
+          : `Impossibile eliminare il cliente. ${message}`,
+        "error",
+      );
     } finally {
       setDeleting(false);
     }

@@ -4,6 +4,10 @@
  */
 import { createClient } from "@supabase/supabase-js";
 import { randomUUID } from "node:crypto";
+import { assertSmokeTargetAllowed } from "./lib/guard-smoke-target.mjs";
+import {
+  cleanupSmokeRecords,
+} from "./lib/smoke-cleanup.mjs";
 import { signInTestUser, signOutTestUser } from "./lib/test-auth.mjs";
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -22,6 +26,8 @@ function ok(message) {
 }
 
 async function main() {
+  assertSmokeTargetAllowed();
+
   if (!url || !anonKey) {
     fail("Variabili Supabase mancanti in .env.local");
   }
@@ -30,6 +36,13 @@ async function main() {
   const session = await signInTestUser(supabase);
   ok("Sessione test autenticata");
 
+  const created = {
+    tourId: null,
+    clienteId: null,
+    preventivoId: null,
+  };
+
+  try {
   const { error: probeError } = await supabase.from("preventivi").select("id").limit(1);
   if (
     probeError &&
@@ -62,6 +75,7 @@ async function main() {
     .single();
 
   if (tourError) fail(`create tour: ${tourError.message}`);
+  created.tourId = tour.id;
   ok(`Tour creato (${tour.id})`);
 
   const clienteId = randomUUID();
@@ -78,6 +92,7 @@ async function main() {
     .single();
 
   if (clienteError) fail(`create cliente: ${clienteError.message}`);
+  created.clienteId = cliente.id;
   ok(`Cliente creato (${cliente.id})`);
 
   const { data: preventivo, error: preventivoError } = await supabase
@@ -98,6 +113,7 @@ async function main() {
     .single();
 
   if (preventivoError) fail(`create preventivo: ${preventivoError.message}`);
+  created.preventivoId = preventivo.id;
   ok(`Preventivo creato (${preventivo.id})`);
 
   const { data: riga, error: rigaError } = await supabase
@@ -187,12 +203,16 @@ async function main() {
     ok("Notifica registrata");
   }
 
-  await supabase.from("tours").delete().eq("id", tour.id);
-  await supabase.from("clienti").delete().eq("id", cliente.id);
-  await signOutTestUser(supabase);
-  ok("Cleanup completato");
-
-  console.log("\n✅ Flusso Preventivi smoke test completato con successo.");
+    console.log("\n✅ Flusso Preventivi smoke test completato con successo.");
+  } finally {
+    await cleanupSmokeRecords(supabase, {
+      preventivoIds: created.preventivoId ? [created.preventivoId] : [],
+      tourIds: created.tourId ? [created.tourId] : [],
+      clienteIds: created.clienteId ? [created.clienteId] : [],
+    });
+    ok("Cleanup completato");
+    await signOutTestUser(supabase);
+  }
 }
 
 main().catch((error) => fail(error.message));

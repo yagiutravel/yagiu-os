@@ -4,6 +4,8 @@
  */
 import { createClient } from "@supabase/supabase-js";
 import { randomUUID } from "node:crypto";
+import { assertSmokeTargetAllowed } from "./lib/guard-smoke-target.mjs";
+import { cleanupSmokeRecords } from "./lib/smoke-cleanup.mjs";
 import { signInTestUser, signOutTestUser } from "./lib/test-auth.mjs";
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -22,6 +24,8 @@ function ok(message) {
 }
 
 async function main() {
+  assertSmokeTargetAllowed();
+
   if (!url || !anonKey) {
     fail("Variabili Supabase mancanti in .env.local");
   }
@@ -30,6 +34,11 @@ async function main() {
   await signInTestUser(supabase);
   ok("Sessione test autenticata");
 
+  const created = {
+    clienteId: null,
+  };
+
+  try {
   const { error: probeError } = await supabase
     .from("cliente_questionari")
     .select("id")
@@ -62,6 +71,7 @@ async function main() {
     .single();
 
   if (clienteError) fail(`create cliente: ${clienteError.message}`);
+  created.clienteId = cliente.id;
   ok(`Cliente creato (${cliente.id})`);
 
   const { data: questionario, error: questionarioError } = await supabase
@@ -143,11 +153,14 @@ async function main() {
   }
   ok("Lista questionari verificata");
 
-  await supabase.from("clienti").delete().eq("id", cliente.id);
-  await signOutTestUser(supabase);
-  ok("Cleanup completato");
-
-  console.log("\n✅ Flusso Questionario smoke test completato con successo.");
+    console.log("\n✅ Flusso Questionario smoke test completato con successo.");
+  } finally {
+    await cleanupSmokeRecords(supabase, {
+      clienteIds: created.clienteId ? [created.clienteId] : [],
+    });
+    ok("Cleanup completato");
+    await signOutTestUser(supabase);
+  }
 }
 
 main().catch((error) => fail(error.message));

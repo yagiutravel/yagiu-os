@@ -4,6 +4,8 @@
  */
 import { createClient } from "@supabase/supabase-js";
 import { randomUUID } from "node:crypto";
+import { assertSmokeTargetAllowed } from "./lib/guard-smoke-target.mjs";
+import { cleanupSmokeRecords } from "./lib/smoke-cleanup.mjs";
 import { signInTestUser, signOutTestUser } from "./lib/test-auth.mjs";
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -22,6 +24,8 @@ function ok(message) {
 }
 
 async function main() {
+  assertSmokeTargetAllowed();
+
   if (!url || !anonKey) {
     fail("Variabili Supabase mancanti in .env.local");
   }
@@ -30,6 +34,12 @@ async function main() {
   await signInTestUser(supabase);
   ok("Sessione test autenticata");
 
+  const created = {
+    tourId: null,
+    clienteId: null,
+  };
+
+  try {
   const { error: toursProbeError } = await supabase
     .from("tours")
     .select("id")
@@ -67,6 +77,7 @@ async function main() {
     .single();
 
   if (tourError) fail(`create tour: ${tourError.message}`);
+  created.tourId = tour.id;
   ok(`Tour creato (${tour.id})`);
 
   const { data: hotel, error: hotelError } = await supabase
@@ -113,6 +124,7 @@ async function main() {
     .single();
 
   if (clienteError) fail(`create cliente: ${clienteError.message}`);
+  created.clienteId = cliente.id;
   ok(`Cliente creato (${cliente.id})`);
 
   const { data: participant, error: participantError } = await supabase
@@ -309,12 +321,15 @@ async function main() {
   if (reloadError || !reloadTour) fail(`reload tour: ${reloadError?.message}`);
   ok("Refresh/persistenza verificata");
 
-  await supabase.from("tours").delete().eq("id", tour.id);
-  await supabase.from("clienti").delete().eq("id", cliente.id);
-  await signOutTestUser(supabase);
-  ok("Cleanup completato");
-
-  console.log("\n✅ Flusso Tour smoke test completato con successo.");
+    console.log("\n✅ Flusso Tour smoke test completato con successo.");
+  } finally {
+    await cleanupSmokeRecords(supabase, {
+      tourIds: created.tourId ? [created.tourId] : [],
+      clienteIds: created.clienteId ? [created.clienteId] : [],
+    });
+    ok("Cleanup completato");
+    await signOutTestUser(supabase);
+  }
 }
 
 main().catch((error) => fail(error.message));

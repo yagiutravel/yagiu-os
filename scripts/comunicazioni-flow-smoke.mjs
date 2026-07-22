@@ -4,6 +4,11 @@
  */
 import { createClient } from "@supabase/supabase-js";
 import { randomUUID } from "node:crypto";
+import { assertSmokeTargetAllowed } from "./lib/guard-smoke-target.mjs";
+import {
+  cleanupSmokeEmailTemplate,
+  cleanupSmokeRecords,
+} from "./lib/smoke-cleanup.mjs";
 import { signInTestUser, signOutTestUser } from "./lib/test-auth.mjs";
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -22,6 +27,8 @@ function ok(message) {
 }
 
 async function main() {
+  assertSmokeTargetAllowed();
+
   if (!url || !anonKey) {
     fail("Variabili Supabase mancanti in .env.local");
   }
@@ -30,6 +37,12 @@ async function main() {
   await signInTestUser(supabase);
   ok("Sessione test autenticata");
 
+  const created = {
+    templateId: null,
+    clienteId: null,
+  };
+
+  try {
   const { error: probeError } = await supabase
     .from("comunicazioni")
     .select("id")
@@ -62,6 +75,7 @@ async function main() {
     .single();
 
   if (clienteError) fail(`create cliente: ${clienteError.message}`);
+  created.clienteId = cliente.id;
   ok(`Cliente creato (${cliente.id})`);
 
   const { data: template, error: templateError } = await supabase
@@ -77,6 +91,7 @@ async function main() {
     .single();
 
   if (templateError) fail(`create email template: ${templateError.message}`);
+  created.templateId = template.id;
   ok(`Template email creato (${template.id})`);
 
   const { data: comunicazione, error: comunicazioneError } = await supabase
@@ -188,12 +203,15 @@ async function main() {
     ok("Timeline cliente registrata");
   }
 
-  await supabase.from("email_templates").delete().eq("id", template.id);
-  await supabase.from("clienti").delete().eq("id", cliente.id);
-  await signOutTestUser(supabase);
-  ok("Cleanup completato");
-
-  console.log("\n✅ Flusso Comunicazioni smoke test completato con successo.");
+    console.log("\n✅ Flusso Comunicazioni smoke test completato con successo.");
+  } finally {
+    await cleanupSmokeEmailTemplate(supabase, created.templateId);
+    await cleanupSmokeRecords(supabase, {
+      clienteIds: created.clienteId ? [created.clienteId] : [],
+    });
+    ok("Cleanup completato");
+    await signOutTestUser(supabase);
+  }
 }
 
 main().catch((error) => fail(error.message));
